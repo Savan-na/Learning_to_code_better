@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSSE1001 Structured Problem-Solving Lab</title>
+    <meta
+      name="description"
+      content="A bilingual structured practice platform for UQ CSSE1001 students to develop problem decomposition, prompt design, testing, debugging, and independent explanation skills."
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#challenges" data-view-link="challenges" aria-label="Back to task home">
+          <span class="brand-mark">CS</span>
+          <span>
+            <strong id="brandTitle">CSSE1001 问题解决实验室</strong>
+            <small id="brandSubtitle">结构化编程训练平台</small>
+          </span>
+        </a>
+
+        <nav class="main-nav" aria-label="Main navigation">
+          <button class="nav-button is-active" type="button" data-view-link="challenges">
+            <span aria-hidden="true">▦</span>
+            <span id="navChallengesText">题库</span>
+          </button>
+          <button class="nav-button" type="button" data-view-link="studio">
+            <span aria-hidden="true">▣</span>
+            <span id="navStudioText">解题工作台</span>
+          </button>
+          <button class="nav-button" type="button" data-view-link="portfolio">
+            <span aria-hidden="true">▤</span>
+            <span id="navPortfolioText">记录</span>
+          </button>
+          <button class="nav-button language-button" type="button" id="languageToggle">
+            <span aria-hidden="true">文</span>
+            <span id="languageToggleText">English</span>
+          </button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero-band" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p id="heroEyebrow" class="eyebrow">面向 UQ CSSE1001</p>
+            <h1 id="hero-title">以知识点组织练习，以过程训练解题能力</h1>
+            <p id="heroBody">
+              平台围绕变量、函数、循环、数据结构与面向对象设计组织题目。学生先完成问题拆解、步骤排序与执行验证，再进入代码实现与反思。
+            </p>
+          </div>
+          <div id="learningDashboard" class="learning-dashboard" aria-label="Learning dashboard"></div>
+        </section>
+
+        <section id="challengeView" class="view is-active" aria-labelledby="challenge-title">
+          <div class="section-heading">
+            <div>
+              <p id="challengeEyebrow" class="eyebrow">题库总览</p>
+              <h2 id="challenge-title">选择知识点</h2>
+            </div>
+            <p id="challengeBody">任务不复刻真实考试题，而是根据公开课程目标和学生反馈设计，帮助学生练习相同类型的思维动作。</p>
+          </div>
+          <div id="categoryTabs" class="category-tabs" aria-label="Knowledge categories"></div>
+          <div id="categorySummary" class="category-summary" aria-live="polite"></div>
+          <div id="challengeGrid" class="challenge-grid" aria-live="polite"></div>
+        </section>
+
+        <section id="examView" class="view" aria-labelledby="exam-title">
+          <div class="exam-layout">
+            <aside class="studio-rail">
+              <button class="ghost-button" type="button" id="backFromExamBtn">
+                <span aria-hidden="true">‹</span>
+                <span id="backFromExamText">返回题库主页</span>
+              </button>
+              <div class="summary-panel">
+                <p id="examSource" class="eyebrow"></p>
+                <h3 id="examQuestionTitle"></h3>
+                <div id="examMeta" class="user-list"></div>
+              </div>
+            </aside>
+
+            <div class="workspace">
+              <section class="workspace-card">
+                <div id="examVisualizer" class="execution-visual"></div>
+              </section>
+
+              <section class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">Q</span>
+                  <div>
+                    <h2 id="exam-title">考试题</h2>
+                    <p id="examNotice">本题来自你提供的 PDF。PDF 未包含官方答案，所以这里只记录你的选择和理由。</p>
+                  </div>
+                </div>
+
+                <pre id="examPrompt" class="question-text"></pre>
+                <div id="examOptions" class="option-list"></div>
+              </section>
+
+              <section class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">1</span>
+                  <div>
+                    <h3 id="examKeywordTitle">题目关键词 → 技术操作</h3>
+                    <p id="examKeywordBody">先看关键词，再把解题动作排成顺序。</p>
+                  </div>
+                </div>
+                <div id="examKeywords" class="keyword-chips"></div>
+                <ol id="examOperationList" class="operation-list"></ol>
+              </section>
+
+              <section class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">2</span>
+                  <div>
+                    <h3 id="examAnswerTitle">作答</h3>
+                    <p id="examAnswerBody">请选择答案，并写出简要作答依据。</p>
+                  </div>
+                </div>
+                <div id="examAnswerArea"></div>
+                <label class="field">
+                  <span id="examReasonLabel">作答依据</span>
+                  <textarea id="examReason" rows="4"></textarea>
+                </label>
+                <div class="toolbar">
+                  <button id="saveExamAnswerBtn" type="button" class="primary-button">保存答案</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="studioView" class="view" aria-labelledby="studio-title">
+          <div class="studio-layout">
+            <aside class="studio-rail">
+              <button class="ghost-button" type="button" id="backToChallengesBtn">
+                <span aria-hidden="true">‹</span>
+                <span id="backText">返回题库主页</span>
+              </button>
+
+              <div id="currentChallengeSummary" class="summary-panel"></div>
+
+              <nav class="step-nav" aria-label="Studio steps">
+                <a id="stepNav0" href="#problemCard">1. 定义问题</a>
+                <a id="stepNav1" href="#ioCard">2. 输入输出</a>
+                <a id="stepNav2" href="#rulesCard">3. 规则步骤</a>
+                <a id="stepNav3" href="#promptCard">4. Prompt</a>
+                <a id="stepNav4" href="#codeCard">5. 代码测试</a>
+                <a id="stepNav5" href="#reflectionCard">6. 诊断反思</a>
+              </nav>
+            </aside>
+
+            <div class="workspace">
+              <section class="workspace-card">
+                <div id="studioVisualizer" class="execution-visual"></div>
+              </section>
+
+              <div class="workspace-title">
+                <div>
+                  <p id="studioEyebrow" class="eyebrow">学习工作台</p>
+                  <h2 id="studio-title">把课程问题翻译成程序与解释</h2>
+                </div>
+                <span id="saveStatus" class="save-status">已准备</span>
+              </div>
+
+              <section id="problemCard" class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">1</span>
+                  <div>
+                    <h3 id="problemSectionTitle">题目说明</h3>
+                    <p id="problemSectionBody">本区域呈现题目原始要求，仅供阅读。</p>
+                  </div>
+                </div>
+                <label class="field">
+                  <span id="problemLabel">问题陈述</span>
+                  <textarea id="problemText" rows="5" readonly></textarea>
+                </label>
+                <label class="field">
+                  <span id="successLabel">验收标准</span>
+                  <textarea id="successText" rows="3" readonly></textarea>
+                </label>
+              </section>
+
+              <section id="ioCard" class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">2</span>
+                  <div>
+                    <h3 id="ioTitle">设计输入、输出和限制</h3>
+                    <p id="ioBody">CSSE1001 的题目通常从规格出发，关键是把数据形状和边界情况先说清楚。</p>
+                  </div>
+                </div>
+                <div class="field-grid">
+                  <label class="field">
+                    <span id="inputLabel">输入</span>
+                    <textarea id="inputText" rows="5"></textarea>
+                  </label>
+                  <label class="field">
+                    <span id="outputLabel">输出</span>
+                    <textarea id="outputText" rows="5"></textarea>
+                  </label>
+                </div>
+                <label class="field">
+                  <span id="constraintsLabel">约束与边界条件</span>
+                  <textarea id="constraintsText" rows="4"></textarea>
+                </label>
+              </section>
+
+              <section id="rulesCard" class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">3</span>
+                  <div>
+                    <h3 id="rulesTitle">题目关键词 → 技术操作</h3>
+                    <p id="rulesBody">先找关键词，再把操作排成正确顺序。</p>
+                  </div>
+                </div>
+
+                <div class="builder-grid">
+                  <div class="builder-column">
+                    <div class="mini-heading">
+                      <h4 id="ruleHeading">题目关键词</h4>
+                      <p id="ruleHint">记录会影响算法选择的词句。</p>
+                    </div>
+                    <ul id="ruleList" class="editable-list"></ul>
+                    <div class="inline-input">
+                      <input id="newRuleInput" type="text" placeholder="添加一条规则" />
+                      <button id="addRuleBtn" type="button" class="icon-button" title="Add rule">＋</button>
+                    </div>
+                  </div>
+
+                  <div class="builder-column">
+                    <div class="mini-heading">
+                      <h4 id="stepHeading">技术操作排序</h4>
+                      <p id="stepHint">用上移、下移调整顺序。</p>
+                    </div>
+                    <ol id="stepList" class="editable-list ordered"></ol>
+                    <div class="inline-input">
+                      <input id="newStepInput" type="text" placeholder="添加一个步骤" />
+                      <button id="addStepBtn" type="button" class="icon-button" title="Add step">＋</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section id="promptCard" class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">4</span>
+                  <div>
+                    <h3 id="promptTitle">生成给 AI 的学习 Prompt</h3>
+                    <p id="promptBody">Prompt 必须要求 AI 解释思路、给测试、标明复杂度，并避免替你完成考试式理解。</p>
+                  </div>
+                </div>
+
+                <div class="toolbar">
+                  <label class="compact-field">
+                    <span id="languageLabel">Prompt 目标语言</span>
+                    <select id="languageSelect">
+                      <option value="Python">Python (CSSE1001)</option>
+                      <option value="JavaScript">JavaScript (browser sandbox)</option>
+                    </select>
+                  </label>
+                  <button id="generatePromptBtn" type="button" class="primary-button">生成 Prompt</button>
+                  <button id="copyPromptBtn" type="button" class="secondary-button">复制 Prompt</button>
+                </div>
+
+                <label class="field">
+                  <span id="promptDraftLabel">Prompt 草稿</span>
+                  <textarea id="promptOutput" rows="13" spellcheck="false"></textarea>
+                </label>
+              </section>
+
+              <section id="codeCard" class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">5</span>
+                  <div>
+                    <h3 id="codeTitle">代码实验室与测试</h3>
+                    <p id="codeBody">当前版本使用浏览器 JavaScript 沙盒运行示例代码；Prompt 可面向 Python 编写。后续版本可接入 Pyodide 以支持 Python 执行。</p>
+                  </div>
+                </div>
+
+                <div class="toolbar">
+                  <button id="loadSampleCodeBtn" type="button" class="secondary-button">载入示例代码</button>
+                  <button id="runTestsBtn" type="button" class="primary-button">运行内置测试</button>
+                </div>
+
+                <label class="field">
+                  <span id="codeEditorLabel">代码编辑器</span>
+                  <textarea id="codeEditor" class="code-editor" rows="20" spellcheck="false"></textarea>
+                </label>
+
+                <div id="testResults" class="test-results" aria-live="polite"></div>
+              </section>
+
+              <section id="reflectionCard" class="workspace-card">
+                <div class="card-heading">
+                  <span class="step-badge">6</span>
+                  <div>
+                    <h3 id="reflectionTitle">诊断与独立解释</h3>
+                    <p id="reflectionBody">重点不只是程序通过测试，而是能够说明算法依据、潜在错误和修正路径。</p>
+                  </div>
+                </div>
+
+                <div id="debugGuide" class="debug-guide"></div>
+
+                <label class="field">
+                  <span id="diagnosisLabel">下一轮需要调整的 Prompt、算法或测试</span>
+                  <textarea id="diagnosisNotes" rows="4"></textarea>
+                </label>
+
+                <div id="reflectionQuestions" class="reflection-list"></div>
+
+                <div class="toolbar">
+                  <button id="savePortfolioBtn" type="button" class="primary-button">保存到学习档案</button>
+                  <button id="resetCurrentBtn" type="button" class="danger-button">重置当前任务</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section id="portfolioView" class="view" aria-labelledby="portfolio-title">
+          <div class="section-heading">
+            <div>
+              <p id="portfolioEyebrow" class="eyebrow">学习证据</p>
+              <h2 id="portfolio-title">训练记录</h2>
+            </div>
+            <p id="portfolioBody">系统保存每个任务的拆解过程、Prompt、测试结果和反思记录，便于复习、导师讨论与 assessment interview 准备。</p>
+          </div>
+          <div id="portfolioList" class="portfolio-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="assets/js/i18n.js"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/examBank.js"></script>
+    <script src="assets/js/visualizer.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/prompt.js"></script>
+    <script src="assets/js/codeRunner.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>

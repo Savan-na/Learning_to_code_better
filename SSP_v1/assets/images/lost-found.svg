@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 460" role="img" aria-label="校园失物招领匹配器插图">
+  <rect width="840" height="460" fill="#eef3f5"/>
+  <rect x="80" y="78" width="680" height="304" rx="22" fill="#ffffff" stroke="#cdd9df" stroke-width="4"/>
+  <rect x="122" y="126" width="260" height="210" rx="16" fill="#f6f7f4" stroke="#d9e0db" stroke-width="4"/>
+  <rect x="154" y="158" width="128" height="24" rx="8" fill="#126d65"/>
+  <rect x="154" y="206" width="180" height="16" rx="8" fill="#d7e6e1"/>
+  <rect x="154" y="244" width="150" height="16" rx="8" fill="#e7d7c0"/>
+  <rect x="154" y="282" width="196" height="16" rx="8" fill="#e5beb8"/>
+  <circle cx="560" cy="220" r="86" fill="#f6f7f4" stroke="#126d65" stroke-width="16"/>
+  <line x1="624" y1="284" x2="690" y2="350" stroke="#126d65" stroke-width="22" stroke-linecap="round"/>
+  <rect x="506" y="184" width="74" height="104" rx="18" fill="#c85245"/>
+  <rect x="522" y="168" width="42" height="28" rx="14" fill="#bb7a12"/>
+  <circle cx="542" cy="234" r="12" fill="#ffffff"/>
+</svg>

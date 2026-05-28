@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 460" role="img" aria-label="班级活动预算助手插图">
+  <rect width="840" height="460" fill="#f5f1e8"/>
+  <rect x="84" y="82" width="672" height="296" rx="20" fill="#ffffff" stroke="#ddceb8" stroke-width="4"/>
+  <rect x="130" y="126" width="220" height="208" rx="14" fill="#126d65"/>
+  <rect x="162" y="162" width="156" height="22" rx="8" fill="#ffffff" opacity=".9"/>
+  <rect x="162" y="210" width="70" height="22" rx="8" fill="#ffffff" opacity=".72"/>
+  <rect x="248" y="210" width="70" height="22" rx="8" fill="#ffffff" opacity=".72"/>
+  <rect x="162" y="258" width="156" height="22" rx="8" fill="#ffffff" opacity=".72"/>
+  <path d="M432 310h230" stroke="#c85245" stroke-width="24" stroke-linecap="round"/>
+  <path d="M432 250h160" stroke="#bb7a12" stroke-width="24" stroke-linecap="round"/>
+  <path d="M432 190h260" stroke="#126d65" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="642" cy="310" r="34" fill="#ffffff" stroke="#c85245" stroke-width="8"/>
+  <path d="M628 310h28" stroke="#c85245" stroke-width="8" stroke-linecap="round"/>
+</svg>

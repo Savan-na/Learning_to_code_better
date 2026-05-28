@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 460" role="img" aria-label="学习时间分析器插图">
+  <rect width="840" height="460" fill="#eef5f2"/>
+  <rect x="70" y="70" width="700" height="320" rx="18" fill="#ffffff" stroke="#cddbd5" stroke-width="4"/>
+  <rect x="120" y="120" width="270" height="36" rx="8" fill="#126d65"/>
+  <rect x="120" y="178" width="460" height="18" rx="9" fill="#d7e6e1"/>
+  <rect x="120" y="220" width="390" height="18" rx="9" fill="#e7d7c0"/>
+  <rect x="120" y="262" width="500" height="18" rx="9" fill="#e5beb8"/>
+  <circle cx="620" cy="230" r="78" fill="#f6f7f4" stroke="#126d65" stroke-width="18"/>
+  <path d="M620 152a78 78 0 0 1 67 118" fill="none" stroke="#c85245" stroke-width="18" stroke-linecap="round"/>
+  <line x1="620" y1="230" x2="620" y2="184" stroke="#1f2933" stroke-width="10" stroke-linecap="round"/>
+  <line x1="620" y1="230" x2="657" y2="246" stroke="#1f2933" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="620" cy="230" r="8" fill="#1f2933"/>
+</svg>
