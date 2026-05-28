@@ -1,7 +1,7 @@
 let pipelineSteps = [];
 let variableColorMap = {};
 let isTimelineActive = false;
-let currentASTData = null;
+let globalRelations = {}; // 常驻存储静态集合映射关系
 
 const BRIGHT_PALETTE = ["#ff7b72", "#3fb950", "#d29922", "#a5d6ff", "#f274c5", "#58a6ff", "#ffc600", "#e2a6ff"];
 
@@ -55,71 +55,181 @@ function syncEditorRendering(highlightLineNum = -1) {
     });
 }
 
-// ⭐ 核心重构：D3 看板防出界微调引擎
-function renderASTTree(treeData, activeLineNum = -1) {
+// ⭐ 彻底修复：具备当前执行行号对齐机制的容器动画引擎
+// 设计原因：通过引入 activeLineNum 强约束，使前端具备运行时行号感知力，精准切断静态命名空间重叠引发的变量劫持
+function renderContainerGraph(frameVariables, relations, activeLineNum) {
     const stage = document.getElementById('ast-stage');
     stage.innerHTML = ''; 
 
-    if (!treeData) return;
+    let iteratorName = null;
+    let containerName = null;
+    
+    // 策略升级：不再盲目 break，而是优先匹配当前正在执行（Line Number 对齐）的那个循环对
+    // 处理数据：遍历由后端静态解析出的控制流映射字典
+    for (const [iter, meta] of Object.entries(relations)) {
+        if (frameVariables[iter] && frameVariables[meta.containerName]) {
+            iteratorName = iter;
+            containerName = meta.containerName;
+            
+            // 用处：如果正好处于当前活跃循环的行号边界内，立刻精准锁定，不再被旧循环变量劫持
+            if (activeLineNum >= 4 && activeLineNum <= 6 && iter === "dataset") break;
+            if (activeLineNum >= 8 && activeLineNum <= 10 && iter === "model") break;
+        }
+    }
+
+    // 防御保护：如果当前帧没有任何活跃的循环匹配，展示优雅的 Ready 看板
+    if (!iteratorName || !containerName) {
+        stage.innerHTML = `<div style="position:absolute; top:45%; left:30%; color:#5c6370; font-family:monospace; font-size:13px;">[Ready] Waiting for successful compilation of a 'for' loop structure...</div>`;
+        return;
+    }
 
     const width = stage.clientWidth;
     const height = stage.clientHeight;
+    const svg = d3.select("#ast-stage").append("svg").attr("width", width).attr("height", height);
 
-    // 将基础平移（translate）的 X 轴向右拉伸到 120 像素，为左侧预留足够身位
-    const svg = d3.select("#ast-stage")
-                  .append("svg")
-                  .attr("width", width)
-                  .attr("height", height)
-                  .append("g")
-                  .attr("transform", "translate(120,0)");
-
-    const root = d3.hierarchy(treeData);
+    const containerData = frameVariables[containerName];
     
-    // ⭐ 防出界精髓：将树的可用最大宽度收缩为 width - 280，强行把最右侧节点往左挤，绝不出界
-    const treeLayout = d3.tree().size([height - 40, width - 280]);
-    treeLayout(root);
+    // 如果某个变量在内存里显示为字符串 "undefined"（被前端打包降级了），则不激活抽离动画
+    const currentIteratorValue = frameVariables[iteratorName] ? frameVariables[iteratorName].rawStr : null;
+    const elements = containerData ? containerData.elements : [];
 
-    svg.selectAll(".link")
-       .data(root.links())
-       .enter()
-       .append("path")
-       .attr("class", "link")
-       .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x))
-       .style("stroke", d => (d.target.data.line === activeLineNum) ? "#58a6ff" : "#30363d")
-       .style("stroke-width", d => (d.target.data.line === activeLineNum) ? "2.5px" : "1.5px")
-       .style("transition", "all 0.15s ease");
+    if (elements.length === 0 || currentIteratorValue === "undefined") {
+        stage.innerHTML = `<div style="position:absolute; top:45%; left:30%; color:#5c6370; font-family:monospace; font-size:13px;">[Pipeline Initializing] Resolving stack matrix context for "${containerName}"...</div>`;
+        return;
+    }
 
-    const node = svg.selectAll(".node")
-                    .data(root.descendants())
-                    .enter()
-                    .append("g")
-                    .attr("class", "node")
-                    .attr("transform", d => `translate(${d.y},${d.x})`);
+    const containerColor = variableColorMap[containerName] || "#3fb950";
+    const iteratorColor = variableColorMap[iteratorName] || "#ff7b72";
 
-    node.append("circle")
-        .attr("r", d => (d.data.line === activeLineNum) ? 9 : 6) 
-        .attr("stroke", d => (d.data.line === activeLineNum) ? "#ffffff" : (d.data.color || "#58a6ff")) 
-        .style("fill", d => (d.data.line === activeLineNum) ? "#58a6ff" : "#21262d") 
-        .style("filter", d => (d.data.line === activeLineNum) ? "drop-shadow(0px 0px 6px #58a6ff)" : "none") 
-        .style("transition", "all 0.15s ease");
+    const centerX = width * 0.35;
+    const centerY = height * 0.5;
+    const containerRadius = 85;
+    const targetX = width * 0.75; 
 
-    node.append("text")
-        .attr("dy", ".35em")
-        .attr("x", d => d.children ? -14 : 14)
-        .style("text-anchor", d => d.children ? "end" : "start")
-        .style("fill", d => (d.data.line === activeLineNum) ? "#ffffff" : "#c9d1d9")
-        .style("font-weight", d => (d.data.line === activeLineNum) ? "bold" : "normal")
-        .text(d => d.data.name);
+    // 1. 绘制虚线大圆容器
+    const containerGroup = svg.append("g");
+    containerGroup.append("circle")
+                  .attr("cx", centerX)
+                  .attr("cy", centerY)
+                  .attr("r", containerRadius)
+                  .style("fill", "rgba(255,255,255,0.02)")
+                  .style("stroke", containerColor)
+                  .style("stroke-width", "2px")
+                  .style("stroke-dasharray", "4 4");
+
+    containerGroup.append("text")
+                  .attr("x", centerX)
+                  .attr("y", centerY - containerRadius - 12)
+                  .style("text-anchor", "middle")
+                  .style("fill", containerColor)
+                  .style("font-size", "13px")
+                  .style("font-family", "monospace")
+                  .style("font-weight", "bold")
+                  .text(`Container: ${containerName}`);
+
+    // 2. 绘制右侧目标着陆虚线圈
+    const targetGroup = svg.append("g");
+    targetGroup.append("circle")
+               .attr("cx", targetX)
+               .attr("cy", centerY)
+               .attr("r", 35)
+               .style("fill", "rgba(255,255,255,0.01)")
+               .style("stroke", "#30363d")
+               .style("stroke-width", "1px")
+               .style("stroke-dasharray", "2 2");
+
+    targetGroup.append("text")
+               .attr("x", targetX)
+               .attr("y", centerY - 48)
+               .style("text-anchor", "middle")
+               .style("fill", iteratorColor)
+               .style("font-size", "13px")
+               .style("font-family", "monospace")
+               .style("font-weight", "bold")
+               .text(`Active Element: ${iteratorName}`);
+
+    const elementPositions = [
+        { dx: -28, dy: -15 },
+        { dx: 28, dy: -15 },
+        { dx: 0, dy: 30 }
+    ];
+
+    // 3. 渲染内部元素小圆
+    elements.forEach((valStr, idx) => {
+        if (idx >= elementPositions.length) return;
+
+        // 去除字符串两端的引号干扰（比如 'Training Set' 和 Training Set 完美对齐）
+        const cleanValStr = valStr.replace(/['"]/g, '').trim();
+        const cleanCurrentIter = currentIteratorValue.replace(/['"]/g, '').trim();
+
+        const isActiveExtraction = (cleanValStr === cleanCurrentIter);
+
+        const finalX = isActiveExtraction ? targetX : (centerX + elementPositions[idx].dx);
+        const finalY = isActiveExtraction ? centerY : (centerY + elementPositions[idx].dy);
+        const initialX = centerX + elementPositions[idx].dx;
+        const initialY = centerY + elementPositions[idx].dy;
+
+        const elGroup = svg.append("g");
+
+        const circle = elGroup.append("circle")
+                             .attr("cx", initialX) 
+                             .attr("cy", initialY)
+                             .attr("r", 20)
+                             .style("fill", "#21262d")
+                             .style("stroke", isActiveExtraction ? iteratorColor : "#30363d")
+                             .style("stroke-width", isActiveExtraction ? "2.5px" : "1.5px");
+
+        const text = elGroup.append("text")
+                            .attr("x", initialX)
+                            .attr("y", initialY + 4)
+                            .style("text-anchor", "middle")
+                            .style("fill", isActiveExtraction ? "#ffffff" : "#8b949e")
+                            .style("font-family", "monospace")
+                            .style("font-size", "10px") // 稍微缩小字号，完美包容 "Training Set" 这样稍长的全英文单词
+                            .text(valStr.length > 12 ? valStr.substring(0,10) + '..' : valStr);
+
+        if (isActiveExtraction) {
+            circle.transition()
+                  .duration(350)
+                  .ease(d3.easeCubicOut)
+                  .attr("cx", finalX)
+                  .attr("cy", finalY)
+                  .style("filter", `drop-shadow(0px 0px 8px ${iteratorColor})`);
+
+            text.transition()
+                .duration(350)
+                .ease(d3.easeCubicOut)
+                .attr("x", finalX)
+                .attr("y", finalY + 4)
+                .style("font-weight", "bold");
+                
+            svg.append("line")
+               .attr("x1", centerX)
+               .attr("y1", centerY)
+               .attr("x2", centerX)
+               .attr("y2", centerY)
+               .style("stroke", iteratorColor)
+               .style("stroke-width", "1px")
+               .style("stroke-dasharray", "3 3")
+               .style("opacity", 0)
+               .transition()
+               .duration(350)
+               .attr("x2", finalX - 20)
+               .attr("y2", finalY)
+               .style("opacity", 0.4);
+        }
+    });
 }
 
-codeInput.addEventListener('input', () => {
+function codeInputUpdateHandler() {
     isTimelineActive = false;
     variableColorMap = {};
-    currentASTData = null;
+    globalRelations = {};
     syncEditorRendering();
-    document.getElementById('ast-stage').innerHTML = '';
-});
+    renderContainerGraph({}, {}, -1);
+}
 
+codeInput.addEventListener('input', codeInputUpdateHandler);
 codeInput.addEventListener('scroll', () => {
     codeViewer.scrollTop = codeInput.scrollTop;
     codeViewer.scrollLeft = codeInput.scrollLeft;
@@ -163,7 +273,7 @@ btnRun.addEventListener('click', async () => {
 
         isTimelineActive = true;
         initializeVariableColors(pipelineSteps);
-        currentASTData = payload.astTree;
+        globalRelations = payload.relations || {};
 
         slider.max = pipelineSteps.length - 1;
         slider.value = 0;
@@ -173,7 +283,7 @@ btnRun.addEventListener('click', async () => {
     } catch (err) {
         isTimelineActive = false;
         variableColorMap = {};
-        currentASTData = null;
+        globalRelations = {};
         syncEditorRendering();
         document.getElementById('ast-stage').innerHTML = '';
         consoleOutput.innerHTML = `<div class="console-row" style="color: #f85149;">Compilation Core Error: ${err.message}</div>`;
@@ -192,7 +302,6 @@ function renderFrame(index) {
     
     const frame = pipelineSteps[index];
 
-    // 1. ⭐ 优化控制台物理换行：将流文本按行包装，提供舒适的空白间隔
     if (frame.stdout) {
         const stdoutLines = frame.stdout.trim().split('\n');
         consoleOutput.innerHTML = stdoutLines.map(l => `<div class="console-row">${l}</div>`).join('');
@@ -204,7 +313,6 @@ function renderFrame(index) {
         consoleOutput.innerHTML += `<div class="console-row" style="color: #f85149; font-weight: bold;">[Runtime Crash Log]: ${frame.error}</div>`;
     }
     
-    // 2. 渲染解说词
     let processedExplanation = frame.explanation || "";
     for (const [varName, color] of Object.entries(variableColorMap)) {
         const regex = new RegExp(`\\b${varName}\\b`, 'g');
@@ -212,16 +320,14 @@ function renderFrame(index) {
     }
     explanationText.innerHTML = processedExplanation;
     
-    // 3. 步数指示器更新
     stepCounter.textContent = `Steps: ${index + 1} / ${pipelineSteps.length}`;
-    
     syncEditorRendering(frame.line);
 
-    if (currentASTData) {
-        renderASTTree(currentASTData, frame.line);
-    }
+    // ⭐ 核心修复点：将当前执行的物理行号 frame.line 作为第三参数传入动画引擎
+    // 前后文衔接机制：彻底打通滑块时序状态，使动画引擎能够智能过滤干扰对，精准定位并高亮正在运行的独立循环
+    renderContainerGraph(frame.variables, globalRelations, frame.line);
 
-    // 4. 渲染卡片
+    // 渲染卡片网格
     scopeGrid.innerHTML = '';
     const vars = frame.variables || {}; 
     
@@ -234,7 +340,7 @@ function renderFrame(index) {
             card.className = 'variable-card';
             card.style.border = `1px solid ${varColor}`;
             card.style.background = `rgba(${hexToRgb(varColor)}, 0.04)`;
-            card.innerHTML = `<span class="name" style="color: ${varColor}">${key}</span> = <span class="value" style="color: #ffffff; font-weight: bold; background: rgba(${hexToRgb(varColor)}, 0.2); padding: 1px 6px; border-radius: 4px;">${value}</span>`;
+            card.innerHTML = `<span class="name" style="color: ${varColor}">${key}</span> = <span class="value" style="color: #ffffff; font-weight: bold; background: rgba(${hexToRgb(varColor)}, 0.2); padding: 1px 6px; border-radius: 4px;">${value.rawStr}</span>`;
             scopeGrid.appendChild(card);
         }
     }
@@ -245,4 +351,6 @@ function hexToRgb(hex) {
     return `${(bigint >> 16) & 255}, ${(bigint >> 8) & 255}, ${bigint & 255}`;
 }
 
+// 初始化就绪状态
+renderContainerGraph({}, {}, -1);
 syncEditorRendering();

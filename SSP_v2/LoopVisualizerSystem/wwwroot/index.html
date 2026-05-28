@@ -26,21 +26,16 @@
         .render-line-row { height: 22.4px; width: 100%; border-radius: 3px; transition: background 0.1s; color: #79c0ff; }
         .render-line-row.active-row { background: rgba(56, 139, 253, 0.15); }
 
-        /* ⭐ 优化控制台的行高与物理换行间隔，彻底告别拥挤 */
         .console-container { padding: 20px; font-family: monospace; font-size: 13px; line-height: 1.8; background: #090d13; min-height: 200px; max-height: 200px; overflow-y: auto; color: #e6edf3; }
         .console-row { margin-bottom: 6px; white-space: pre-wrap; word-break: break-all; }
 
         .scope-container { padding: 16px; background: #0d1117; border-top: 1px solid #30363d; min-height: 150px; }
         .scope-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 10px; }
         .variable-card { background: #21262d; border: 1px solid #30363d; border-radius: 6px; padding: 10px; font-size: 12px; font-family: monospace; }
-        .variable-card .name { color: #ff7b72; font-weight: bold; }
-        .variable-card .value { color: #a5d6ff; margin-left: 4px; }
         
+        /* ⭐ 样式重构：容器与变量关系抽取面板 */
         .ast-panel { margin-top: 24px; background: #0d1117; border-radius: 8px; border: 1px solid #30363d; overflow: hidden; }
-        .ast-stage { width: 100%; height: 300px; background: #090d13; position: relative; }
-        .node circle { fill: #21262d; stroke-width: 2px; }
-        .node text { font-family: monospace; font-size: 12px; fill: #c9d1d9; }
-        .link { fill: none; stroke: #30363d; stroke-width: 1.5px; }
+        .ast-stage { width: 100%; height: 320px; background: #090d13; position: relative; }
 
         .interactive-panel { background: #21262d; border-radius: 8px; padding: 20px; border: 1px solid #30363d; margin-top: 24px; }
         .controls { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
@@ -67,11 +62,10 @@
                 <div class="gutter-zone" id="gutter-zone"></div>
                 <div class="editor-stage">
                     <textarea class="code-editor" id="code-input" spellcheck="false" wrap="off">total_sum = 0
-multipliers = [1, 2, 3]
+datasets = [10, 20, 30]
 
-for factor in multipliers:
-    result = factor * 10
-    total_sum += result</textarea>
+for dataset in datasets:
+    total_sum += dataset</textarea>
                     <div class="code-viewer-container" id="code-viewer"></div>
                 </div>
             </div>
@@ -89,7 +83,7 @@ for factor in multipliers:
     </div>
 
     <div class="ast-panel">
-        <div class="panel-header">ABSTRACT SYNTAX TREE (AST) COMPILER VISUALIZER</div>
+        <div class="panel-header">LOOP CONTAINER & ITERATOR RELATIONSHIP VISUALIZER</div>
         <div class="ast-stage" id="ast-stage"></div>
     </div>
 

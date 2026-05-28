@@ -46,7 +46,6 @@ namespace LoopVisualizerSystem.Controllers
                     PropertyNameCaseInsensitive = true
                 };
 
-                // ⭐ 调整解析目标为全量载荷模型
                 var payload = JsonSerializer.Deserialize<PythonResponsePayload>(jsonResult, options);
                 
                 if (payload != null && payload.Steps != null)
@@ -80,8 +79,7 @@ namespace LoopVisualizerSystem.Controllers
                 if (!string.IsNullOrEmpty(steps[i].Error))
                 {
                     steps[i].Explanation = $"<span style='color: #f85149; font-weight: bold;'>[CRASH ALERT at Line {steps[i].Line}]</span> " +
-                                           $"The execution engine safely intercepted a fatal runtime exception: <code>{steps[i].Error}</code>. " +
-                                           $"A loop requires an <span>Iterable object</span> to traverse.";
+                                           $"The execution engine safely intercepted a fatal runtime exception: <code>{steps[i].Error}</code>.";
                     continue;
                 }
 
@@ -91,19 +89,21 @@ namespace LoopVisualizerSystem.Controllers
                     continue;
                 }
 
+                // 统一降级提取变量纯文本字符串进行差值比对
                 var prevVars = steps[i - 1].Variables;
                 var currVars = steps[i].Variables;
 
                 List<string> changes = new List<string>();
                 foreach (var kvp in currVars)
                 {
+                    string currValueStr = kvp.Value.RawStr;
                     if (!prevVars.ContainsKey(kvp.Key))
                     {
-                        changes.Add($"Variable `{kvp.Key}` was initialized and allocated to <span>\"{kvp.Value}\"</span>");
+                        changes.Add($"Variable `{kvp.Key}` was initialized and allocated to <span>\"{currValueStr}\"</span>");
                     }
-                    else if (prevVars[kvp.Key] != kvp.Value)
+                    else if (prevVars[kvp.Key].RawStr != currValueStr)
                     {
-                        changes.Add($"Variable `{kvp.Key}` mutated from \"{prevVars[kvp.Key]}\" to <span>\"{kvp.Value}\"</span>");
+                        changes.Add($"Variable `{kvp.Key}` mutated to <span>\"{currValueStr}\"</span>");
                     }
                 }
 
@@ -122,20 +122,33 @@ namespace LoopVisualizerSystem.Controllers
 
     public class CodeRequest { public string Code { get; set; } }
     
-    // ⭐ 新增：统一的数据交互载荷类
     public class PythonResponsePayload
     {
         public List<TelemetryStep>? Steps { get; set; }
-        public object? AstTree { get; set; }
+        // 传输集合拓扑关系字典
+        public Dictionary<string, LoopRelationMeta>? Relations { get; set; }
+    }
+
+    public class LoopRelationMeta
+    {
+        public string ContainerName { get; set; } = "";
+        public string Type { get; set; } = "";
     }
     
     public class TelemetryStep
     {
         public int StepNumber { get; set; }
         public int Line { get; set; }
-        public Dictionary<string, string> Variables { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, VariableValuePack> Variables { get; set; } = new Dictionary<string, VariableValuePack>();
         public string Stdout { get; set; } = "";
         public string Explanation { get; set; } = "";
         public string Error { get; set; } = "";
+    }
+
+    public class VariableValuePack
+    {
+        public bool IsList { get; set; }
+        public string RawStr { get; set; } = "";
+        public List<string> Elements { get; set; } = new List<string>();
     }
 }
