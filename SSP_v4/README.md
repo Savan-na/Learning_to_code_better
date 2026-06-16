@@ -1,70 +1,94 @@
-# SSP v3: Python Trace Practice Board
+# SSP v4: Python Trace Practice Board
 
-SSP v3 is a local learning tool for beginner Python programming. It helps students inspect how code runs step by step: which line executes, how variables change, why an error happens, and which programming idea the task is practicing.
+SSP v4 是一个本地运行的 Python 编程学习工具。它的核心目标不是让学生“背语法”，而是让学生看见程序真实执行过程：哪一行正在运行、变量如何变化、错误为什么发生、代码是否真的达成了任务目标。
 
-The execution result comes from a local Python tracing engine, not from AI guessing. The ASP.NET Core backend runs the trace engine, and the frontend turns the trace into code highlighting, variable cards, a timeline slider, step explanations, task goals, and final-value questions.
+当前版本已经从“多个学习模式让学生自己选择”调整为更清晰的学生路径：
+
+```text
+选择 Practice Topic -> 按 Level 1 到 Level 5 顺序练习 -> Compile & Run -> 看 Run Timeline 和反馈 -> 到 Dashboard 看成长
+```
+
+学生不需要选择 `Mission / Level`、`Prediction Game`、`Debug Detective` 这些内部设计概念。系统会根据题目阶段自动安排练习形式。
 
 ## Run The App
 
-Stop any old backend process first, then start the backend from the main project directory:
+在 PowerShell 里进入主项目目录：
 
 ```powershell
-cd D:\Desktop\test-SSP\SSP_v3\LoopVisualizerSystem
+cd D:\Desktop\test-SSP\SSP_v4\LoopVisualizerSystem
 dotnet run --urls http://127.0.0.1:5057
 ```
 
-Open this URL in the browser:
+然后在 Edge 里打开：
 
 ```text
-http://127.0.0.1:5057/?v=latest
+http://127.0.0.1:5057/
 ```
 
-If the browser still shows an old interface:
+如果页面没有更新，按 `Ctrl + F5` 强制刷新。
 
-1. Stop the old `dotnet run` terminal with `Ctrl+C`, then run the command above again.
-2. Force refresh the browser with `Ctrl+F5`, or open the URL in an incognito/private window.
-3. If port `5057` is already occupied, inspect the process:
-
-   ```powershell
-   Get-NetTCPConnection -LocalPort 5057 -ErrorAction SilentlyContinue | Select-Object LocalAddress,LocalPort,State,OwningProcess
-   ```
-
-   After confirming it is an old `dotnet` or `LoopVisualizerSystem` process, stop that PID:
-
-   ```powershell
-   Stop-Process -Id <PID> -Force
-   ```
+不要使用 `5061` 端口打开页面，Edge 可能会拦截并显示 `ERR_UNSAFE_PORT`。
 
 ## Requirements
 
 - .NET SDK 9
-- Python available as `python` from PowerShell
-
-Check Python with:
+- Python 3，并且 PowerShell 中至少有一个命令可用：
 
 ```powershell
 python --version
+py --version
 ```
 
-If `python` is not available, the page can still open, but `Compile & Run` cannot generate a trace.
+如果 Python 不可用，网页可以打开，但 `Compile & Run` 无法生成代码执行轨迹。
 
-## Current Learning Flow
+## If The App Is Locked
 
-1. Choose a topic.
-2. Choose a practice task.
-3. Read the topic knowledge point and programming algorithm summary.
-4. Read the student learning goal in the Practice Task panel.
-5. Edit the Python code.
-6. Click `Compile & Run`.
-7. Use the timeline slider to inspect executed steps.
-8. Read variable values and the step explanation at the bottom.
-9. Answer the final-value questions in the Practice Task panel.
+如果运行或编译时出现类似：
 
-Final-value questions allow three attempts. On the third attempt, the correct answer is shown whether the student's answer is correct or not.
+```text
+LoopVisualizerSystem.exe because it is being used by another process
+```
 
-## Topics And Tasks
+说明旧的后端进程还在运行。可以先查找并停止旧进程：
 
-Each topic now has at least five practice tasks:
+```powershell
+Get-Process LoopVisualizerSystem -ErrorAction SilentlyContinue
+Get-Process LoopVisualizerSystem -ErrorAction SilentlyContinue | Stop-Process -Force
+```
+
+然后重新运行：
+
+```powershell
+dotnet run --urls http://127.0.0.1:5057
+```
+
+## Current Student Flow
+
+1. 学生选择 `Practice Topic`，例如 `For Loop`、`Accumulator Pattern`、`Recursion Intro`。
+2. 系统自动载入这个 Topic 的当前 Level。
+3. 学生阅读 `Practice Path` 中的当前任务目标。
+4. 学生修改 `Code`。
+5. 点击 `Compile & Run`。
+6. 如果程序顺利运行，`Run Timeline` 会显示每一步执行过程。
+7. `Variables` 会显示变量最终和中间状态。
+8. `Code` 中出现的变量名会被赋予不同颜色，并和 `Variables` 面板保持一致。
+9. `Practice Path` 会自动判断本关是否通过。
+10. 通过后，下一个 Level 自动解锁。
+11. 学生可以切换到 `Dashboard` 查看进度、技能云和每个 Topic 的下一步。
+
+## Practice Topic And Levels
+
+每个 Topic 现在统一组织成 5 个 Level：
+
+| Level | 学习阶段 | 目标 |
+| --- | --- | --- |
+| Level 1 | Fill a small blank | 完成一个很小的代码改动 |
+| Level 2 | Complete one missing line | 补全关键的一行代码 |
+| Level 3 | Complete the key block | 补全核心逻辑块 |
+| Level 4 | Write the program logic | 写出主要程序逻辑 |
+| Level 5 | Debug Detective | 找出问题代码、解释原因、修复并运行通过 |
+
+当前 Topic 包括：
 
 - Variable Assignment
 - If / Else
@@ -75,22 +99,115 @@ Each topic now has at least five practice tasks:
 - Nested Loop
 - Function Call
 - Recursion Intro
-- Simple
-- Medium
 - Complex
 
-The Simple, Medium, and Complex topic options provide mixed-concept practice:
+## Main UI Areas
 
-- Simple tasks combine two concepts.
-- Medium tasks combine about four concepts.
-- Complex tasks include algorithmic code, fill-in-the-blank code, or code-writing prompts.
+### Practice
 
-For fill-in-the-blank tasks, `Compile & Run` stays disabled until every blank token such as `___1___` is replaced in the editor.
+`Practice` 是默认页面。学生主要在这里完成题目。
+
+- `Practice Topic`: 选择想练习的编程主题。
+- `Practice Path`: 显示当前 Level、任务目标、运行反馈和 Level 卡片。
+- `Code`: 学生编辑 Python 代码的位置。
+- `Compile & Run`: 调用后端执行代码并生成 trace。
+- `Run Timeline`: 用滑块查看每一步执行。
+- `Variables`: 显示当前步骤中的变量和值。
+- `Step Explanation`: 用自然语言解释当前执行步骤。
+
+### Dashboard
+
+`Dashboard` 是成长页面，不是练习页面。
+
+它会显示：
+
+- 已完成 Level 数量
+- 总体进度百分比
+- 已训练技能数量
+- Skill Cloud
+- 每个 Topic 的完成度
+- 每个 Topic 的下一步 Level
+
+### Guide
+
+`Guide` 会按真实学生流程引导操作：
+
+1. 选择 Topic
+2. 理解 Practice Path
+3. 查看当前 Level
+4. 编辑 Code
+5. Compile & Run
+6. 阅读反馈
+7. 拖动 Timeline
+8. 查看变量和步骤解释
+9. 打开 Dashboard 查看成长
+
+### Focus Mode
+
+`Focus Mode` 会隐藏部分辅助区域，让学生更专注在当前题目、代码和运行轨迹上。
+
+### Reset Progress
+
+`Reset Progress` 会清除本地进度，并让当前 Topic 回到 Level 1。
+
+进度保存在浏览器 `localStorage` 中，不依赖账号系统。
+
+## Feedback And Anti-Shortcut Rules
+
+系统会自动判断任务是否完成。
+
+例如任务要求：
+
+```text
+Make total_sum finish as 60.
+```
+
+正确方向应该是通过循环和累加器得到 60，例如：
+
+```python
+total_sum = 0
+numbers = [10, 20, 30]
+
+for number in numbers:
+    total_sum += number
+```
+
+系统会尽量阻止直接写最终答案的行为，例如：
+
+```python
+total_sum = 60
+```
+
+因为这没有训练学生理解循环和累加过程。
+
+如果某个检查没有通过，`Practice Path` 会显示失败项，并提供 `Show fix` 按钮给出修复方向。
+
+## Variable Color Behavior
+
+当代码成功运行且没有 runtime error 时：
+
+- `Variables` 面板中的每个变量会获得一个颜色。
+- `Code` 中相同变量名会使用同一颜色。
+- 学生拖动 Timeline 时，当前执行行仍会高亮。
+- 学生一旦修改代码，颜色高亮会立即取消，直到下一次成功运行。
+
+这样可以帮助学生把“代码里的变量名”和“运行时变量值”对应起来。
+
+## Fill-In-The-Blank Tasks
+
+部分复杂题目包含类似：
+
+```python
+___1___
+___2___
+```
+
+这样的空位。只要空位还没替换完，`Compile & Run` 会显示 `Fill Blanks First`，并保持不可用。
 
 ## Project Structure
 
 ```text
-SSP_v3/
+SSP_v4/
   README.md
   LoopVisualizerSystem/
     LoopVisualizerSystem.csproj
@@ -106,76 +223,79 @@ SSP_v3/
 
 ## Backend Overview
 
-`Program.cs` configures the ASP.NET Core app:
+`Program.cs`:
 
-- Registers controllers
-- Serves static frontend files from `wwwroot`
-- Sends no-cache headers for static files so updated UI assets are loaded reliably
-- Maps backend API routes
+- 注册 controllers
+- 提供 `wwwroot` 静态前端文件
+- 给静态文件设置 no-cache header，方便开发时刷新 UI
+- 映射 API 路由
 
-`Controllers/ExecutionController.cs` handles `POST /api/execution/run`:
+`Controllers/ExecutionController.cs` 处理：
 
-- Receives Python code from the frontend
-- Writes the code to a temporary `.py` file
-- Runs `Engine/trace_engine.py`
-- Reads JSON trace output
-- Adds teaching metadata such as concepts, variable changes, friendly errors, and explanations
+```text
+POST /api/execution/run
+```
 
-`Engine/trace_engine.py` is the Python tracing engine:
+它会：
 
-- Uses `compile()` to catch syntax and indentation errors
-- Uses `sys.settrace()` to capture line-by-line execution
-- Records line number, scope, variables, stdout, and runtime errors
-- Stops possible infinite loops with a maximum step count
+- 接收前端发来的 Python 代码
+- 写入临时 `.py` 文件
+- 调用 `Engine/trace_engine.py`
+- 读取 JSON trace 输出
+- 返回执行行号、变量快照、变量变化、stdout、错误信息和步骤解释
+
+`Engine/trace_engine.py`:
+
+- 用 `compile()` 捕捉语法和缩进错误
+- 用 `sys.settrace()` 捕捉逐行执行
+- 记录 line、scope、variables、stdout 和 runtime error
+- 用最大步数限制防止无限循环卡死
 
 ## Frontend Overview
 
-`wwwroot/index.html` defines the interface:
+`wwwroot/index.html` 定义页面结构：
 
-- Topic and task selection
-- Knowledge point and algorithm summary
-- Code editor with line numbers
-- Practice Task panel with learning goal, fill-in-the-blank gate, and final-value questions
-- Run timeline
-- Variable display
-- Step explanation display
-- Guided walkthrough overlay
+- Practice / Dashboard 顶部切换
+- Practice Topic 选择
+- Code 编辑区
+- Run Timeline
+- Variables
+- Step Explanation
+- Practice Path
+- Dashboard
+- Guide overlay
 
-`wwwroot/app.js` handles the interaction:
+`wwwroot/app.js` 负责交互逻辑：
 
-- Loads topics and practice tasks
-- Calls `/api/execution/run`
-- Renders trace frames
-- Highlights the active code line
-- Colors tracked variables
-- Shows variable cards and step explanations
-- Enforces fill-in-the-blank completion before compiling
-- Tracks final-value question attempts
-- Reveals correct final-value answers after the third attempt
+- 管理 Topic 和 Level 路径
+- 调用 `/api/execution/run`
+- 渲染 trace timeline
+- 高亮当前执行行
+- 给变量分配颜色
+- 渲染变量卡片和步骤解释
+- 判断任务是否通过
+- 解锁下一关
+- 保存本地进度
+- 渲染 Dashboard
 
-## Testing Suggestions
+## Quick Smoke Test
 
-Use the default Accumulator Pattern task:
+打开默认页面后，可以用 Accumulator 任务测试：
 
 ```python
 total_sum = 0
 numbers = [10, 20, 30]
 
 for number in numbers:
-    total_sum = number
+    total_sum += number
 ```
 
-Expected behavior:
+预期行为：
 
-- The app opens through `http://127.0.0.1:5057/?v=latest`.
-- `Compile & Run` calls the backend.
-- The active code line is highlighted.
-- Variable cards update as the timeline moves.
-- The final-value question appears under Practice Task.
-- A wrong answer can be tried twice.
-- The third attempt reveals the correct final value.
+- 点击 `Compile & Run` 后能看到 timeline。
+- `total_sum` 最终为 `60`。
+- `number` 和 `total_sum` 在 `Variables` 中有不同颜色。
+- `Code` 里的 `number` 和 `total_sum` 也显示对应颜色。
+- 当前 Level 显示通过。
+- 下一 Level 自动解锁。
 
-For a Complex fill-in-the-blank task:
-
-- The run button should show `Fill Blanks First` while blank tokens remain.
-- After replacing all blank tokens, `Compile & Run` should become available.

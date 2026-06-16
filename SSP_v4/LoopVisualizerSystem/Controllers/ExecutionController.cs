@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
@@ -10,6 +11,12 @@ namespace LoopVisualizerSystem.Controllers
     [Route("api/[controller]")]
     public class ExecutionController : ControllerBase
     {
+        [HttpGet("health")]
+        public IActionResult Health()
+        {
+            return Ok(GetPythonHealth());
+        }
+
         [HttpPost("run")]
         public IActionResult ExecuteCode([FromBody] CodeRequest request)
         {
@@ -24,21 +31,7 @@ namespace LoopVisualizerSystem.Controllers
             {
                 System.IO.File.WriteAllText(tempInputFile, request.Code);
 
-                ProcessStartInfo start = new ProcessStartInfo
-                {
-                    FileName = "python",
-                    Arguments = $"Engine/trace_engine.py \"{tempInputFile}\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                };
-
-                string jsonResult = "";
-                using (Process process = Process.Start(start) ?? throw new InvalidOperationException("Python tracing process could not be started."))
-                {
-                    using StreamReader reader = process.StandardOutput;
-                    jsonResult = reader.ReadToEnd();
-                }
+                string jsonResult = RunTraceEngine(tempInputFile);
 
                 var options = new JsonSerializerOptions
                 {
@@ -60,6 +53,117 @@ namespace LoopVisualizerSystem.Controllers
                     System.IO.File.Delete(tempInputFile);
                 }
             }
+        }
+
+        private static string RunTraceEngine(string tempInputFile)
+        {
+            var attempts = new List<string>();
+            var candidates = new[]
+            {
+                new { FileName = "python", Arguments = $"Engine/trace_engine.py \"{tempInputFile}\"" },
+                new { FileName = "py", Arguments = $"-3 Engine/trace_engine.py \"{tempInputFile}\"" }
+            };
+
+            foreach (var candidate in candidates)
+            {
+                try
+                {
+                    ProcessStartInfo start = new ProcessStartInfo
+                    {
+                        FileName = candidate.FileName,
+                        Arguments = candidate.Arguments,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    };
+
+                    using Process process = Process.Start(start) ?? throw new InvalidOperationException("Python tracing process could not be started.");
+                    string stdout = process.StandardOutput.ReadToEnd();
+                    string stderr = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+
+                    if (process.ExitCode == 0 && !string.IsNullOrWhiteSpace(stdout))
+                    {
+                        return stdout;
+                    }
+
+                    attempts.Add($"{candidate.FileName}: exit {process.ExitCode} {stderr}".Trim());
+                }
+                catch (Win32Exception ex)
+                {
+                    attempts.Add($"{candidate.FileName}: {ex.Message}");
+                }
+            }
+
+            throw new InvalidOperationException(
+                "Python tracing engine could not start. Install Python 3 and make either `python` or `py -3` available from PowerShell. " +
+                string.Join(" | ", attempts)
+            );
+        }
+
+        private static PythonHealth GetPythonHealth()
+        {
+            var attempts = new List<string>();
+            var candidates = new[]
+            {
+                new { Runner = "python", FileName = "python", Arguments = "--version" },
+                new { Runner = "py -3", FileName = "py", Arguments = "-3 --version" }
+            };
+
+            foreach (var candidate in candidates)
+            {
+                try
+                {
+                    ProcessStartInfo start = new ProcessStartInfo
+                    {
+                        FileName = candidate.FileName,
+                        Arguments = candidate.Arguments,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    };
+
+                    using Process process = Process.Start(start) ?? throw new InvalidOperationException("Version check could not start.");
+                    bool exited = process.WaitForExit(2500);
+
+                    if (!exited)
+                    {
+                        process.Kill(entireProcessTree: true);
+                        attempts.Add($"{candidate.Runner}: timed out");
+                        continue;
+                    }
+
+                    string stdout = process.StandardOutput.ReadToEnd();
+                    string stderr = process.StandardError.ReadToEnd();
+                    string version = string.IsNullOrWhiteSpace(stdout) ? stderr.Trim() : stdout.Trim();
+                    if (process.ExitCode == 0)
+                    {
+                        return new PythonHealth
+                        {
+                            PythonAvailable = true,
+                            Runner = candidate.Runner,
+                            Version = version,
+                            Message = $"{candidate.Runner} is available."
+                        };
+                    }
+
+                    attempts.Add($"{candidate.Runner}: exit {process.ExitCode} {version}".Trim());
+                }
+                catch (Win32Exception ex)
+                {
+                    attempts.Add($"{candidate.Runner}: {ex.Message}");
+                }
+            }
+
+            return new PythonHealth
+            {
+                PythonAvailable = false,
+                Runner = "",
+                Version = "",
+                Message = "Python 3 is not available. Install Python 3 and make either `python` or `py -3` available from PowerShell. " + string.Join(" | ", attempts)
+            };
         }
 
         private List<TelemetryStep> GenerateExplanations(List<TelemetryStep>? steps, string code)
@@ -431,6 +535,14 @@ namespace LoopVisualizerSystem.Controllers
     }
 
     public class CodeRequest { public string? Code { get; set; } }
+
+    public class PythonHealth
+    {
+        public bool PythonAvailable { get; set; }
+        public string Runner { get; set; } = "";
+        public string Version { get; set; } = "";
+        public string Message { get; set; } = "";
+    }
 
     public class TelemetryStep
     {

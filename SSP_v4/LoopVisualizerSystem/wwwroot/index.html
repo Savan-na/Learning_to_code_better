@@ -11,29 +11,41 @@
         .header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-bottom: 4px; }
         .header h1 { color: #f5faf7; font-size: 22px; font-weight: 700; letter-spacing: 0; }
         .header-subtitle { color: #91a39a; font-size: 13px; }
+        .header-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+        .view-tab.active { background: #1f6feb; border-color: #58a6ff; color: #ffffff; }
+        .focus-rules { display: none; }
 
-        .top-row { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(260px, 1.15fr) auto; gap: 12px; align-items: end; }
+        .top-row { display: grid; grid-template-columns: minmax(260px, 0.45fr) auto minmax(320px, 1fr); gap: 12px; align-items: end; }
         .flow-field { display: grid; gap: 7px; min-width: 0; }
+        .mode-field, .task-field { display: none; }
+        .mode-context { grid-column: 1 / -1; color: #b7c9c0; background: #171b1a; border: 1px solid #34423a; border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.45; }
+        .mode-context strong { color: #7cc7ff; }
         .field-label { color: #91a39a; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
         select { width: 100%; min-height: 42px; background: #171b1a; color: #f3faf6; border: 1px solid #34423a; border-radius: 6px; padding: 10px 12px; font-size: 13px; outline: none; }
         select:focus { border-color: #68d391; box-shadow: 0 0 0 3px rgba(104, 211, 145, 0.14); }
 
-        .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .info-row { display: grid; grid-template-columns: 1fr; gap: 14px; }
         .surface { background: #171b1a; border: 1px solid #34423a; border-radius: 8px; overflow: hidden; }
         .surface-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 50px; padding: 12px 16px; background: #202724; border-bottom: 1px solid #34423a; color: #b7c9c0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
         .surface-body { padding: 16px; color: #dbe7df; font-size: 14px; line-height: 1.6; }
         .surface-body strong { color: #ffffff; }
 
-        .practice-layout { display: grid; grid-template-columns: minmax(520px, 1.1fr) minmax(340px, 0.9fr); gap: 18px; align-items: stretch; }
+        .practice-layout { display: grid; grid-template-columns: minmax(420px, 0.95fr) minmax(460px, 1.05fr); gap: 18px; align-items: start; }
         .code-panel, .exercise-panel, .timeline-panel { min-width: 0; }
-        .workspace-body { position: relative; width: 100%; height: 420px; background: #0c100f; display: flex; overflow: hidden; }
+        .exercise-panel { grid-column: 1 / -1; }
+        .workspace-body { position: relative; width: 100%; height: var(--workspace-height, 156px); background: #0c100f; display: flex; overflow: hidden; transition: height 0.16s ease; }
+        .workspace-body.scrolling-code::after { content: "Scroll"; position: absolute; right: 10px; bottom: 8px; z-index: 4; color: #91a39a; background: rgba(16,19,18,0.88); border: 1px solid #34423a; border-radius: 999px; padding: 3px 8px; font-size: 11px; font-weight: 800; pointer-events: none; }
         .gutter-zone { width: 46px; height: 100%; flex: 0 0 46px; background: #090c0b; border-right: 1px solid #34423a; display: flex; flex-direction: column; padding: 20px 0; font-family: Consolas, "SFMono-Regular", monospace; font-size: 14px; line-height: 1.6; color: #607066; text-align: right; padding-right: 12px; user-select: none; overflow: hidden; }
         .gutter-num { height: 22.4px; }
         .gutter-num.active-num { color: #68d391; font-weight: 700; }
         .editor-stage { position: relative; flex: 1 1 auto; height: 100%; min-width: 0; }
-        .code-editor { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; color: transparent; caret-color: #68d391; border: 0; padding: 20px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 14px; line-height: 1.6; resize: none; outline: none; z-index: 3; white-space: pre; overflow: auto; }
-        .code-viewer-container { position: absolute; inset: 0; padding: 20px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 14px; line-height: 1.6; z-index: 1; pointer-events: none; white-space: pre; overflow: hidden; }
-        .render-line-row { height: 22.4px; width: 100%; border-radius: 4px; transition: background 0.1s; color: #b9d8ff; }
+        .code-editor { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; color: #b9d8ff; caret-color: #68d391; border: 0; padding: 20px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 14px; line-height: 1.6; resize: none; outline: none; z-index: 3; white-space: pre; overflow: auto; tab-size: 4; font-variant-ligatures: none; letter-spacing: 0; }
+        .workspace-body.variable-colored .code-editor { color: transparent; -webkit-text-fill-color: transparent; }
+        .code-viewer-container { position: absolute; inset: 0; padding: 20px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 14px; line-height: 1.6; z-index: 1; pointer-events: none; white-space: pre; overflow: hidden; tab-size: 4; font-variant-ligatures: none; letter-spacing: 0; }
+        .render-line-row { height: 22.4px; width: 100%; border-radius: 4px; transition: background 0.1s; color: transparent; }
+        .render-line-row span { color: transparent !important; }
+        .workspace-body.variable-colored .render-line-row { color: #b9d8ff; }
+        .workspace-body.variable-colored .render-line-row .code-variable-token { color: var(--variable-color) !important; font-weight: 800; }
         .render-line-row.active-row { background: rgba(104, 211, 145, 0.16); }
 
         .btn { min-height: 38px; background: #238636; color: #ffffff; border: 0; padding: 10px 18px; font-size: 13px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: background 0.16s, transform 0.16s; white-space: nowrap; }
@@ -43,13 +55,10 @@
         .secondary-btn { min-height: 38px; background: #252d2a; color: #e7f2ec; border: 1px solid #3f4e46; padding: 9px 13px; font-size: 12px; font-weight: 700; border-radius: 6px; cursor: pointer; white-space: nowrap; }
         .secondary-btn:hover:not(:disabled) { background: #2d3833; }
         .secondary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .danger-btn { background: #382522; border-color: #6b3a34; color: #ffd7d2; }
+        .danger-btn:hover:not(:disabled) { background: #4a2c28; }
 
         .task-content { display: grid; gap: 14px; align-content: start; min-height: 420px; }
-        .task-kicker { color: #68d391; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-        .task-title { color: #ffffff; font-size: 21px; font-weight: 750; line-height: 1.25; }
-        .task-objective { color: #dbe7df; font-size: 15px; line-height: 1.6; }
-        .task-meta { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
-        .task-pill { border: 1px solid #3f4e46; background: #101312; color: #b7c9c0; border-radius: 999px; padding: 6px 10px; font-size: 12px; font-weight: 700; }
         .blank-panel { display: grid; gap: 8px; padding: 12px; background: #101312; border: 1px solid #34423a; border-radius: 6px; }
         .blank-title { color: #f5faf7; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; }
         .blank-help { color: #91a39a; font-size: 12px; line-height: 1.45; }
@@ -57,28 +66,87 @@
         .blank-row span:first-child { font-family: Consolas, "SFMono-Regular", monospace; color: #f4c95d; }
         .blank-row strong { color: #f4c95d; text-transform: uppercase; font-size: 11px; }
         .blank-row.filled strong { color: #68d391; }
-        .final-check-panel { display: grid; gap: 10px; padding-top: 14px; border-top: 1px solid #34423a; margin-top: 6px; }
-        .final-check-title { color: #f5faf7; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; }
-        .final-question { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(90px, 150px) auto; gap: 10px; align-items: center; background: #101312; border: 1px solid #34423a; border-radius: 6px; padding: 10px; }
-        .final-question-prompt { color: #dbe7df; font-size: 13px; line-height: 1.4; }
-        .final-answer-input { width: 100%; min-height: 36px; background: #171b1a; color: #ffffff; border: 1px solid #3f4e46; border-radius: 6px; padding: 8px 10px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 13px; outline: none; }
-        .final-answer-input:focus { border-color: #68d391; box-shadow: 0 0 0 3px rgba(104, 211, 145, 0.14); }
-        .final-question-feedback { grid-column: 1 / -1; min-height: 18px; color: #91a39a; font-size: 12px; line-height: 1.45; }
-        .final-question-feedback.good { color: #68d391; font-weight: 700; }
-        .final-question-feedback.needs-work { color: #f4c95d; font-weight: 700; }
-        .final-question-feedback.revealed { color: #dbe7df; }
+        .mode-panel { display: grid; gap: 12px; padding: 12px; background: #101312; border: 1px solid #34423a; border-radius: 6px; }
+        .mode-panel-title { color: #f5faf7; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; }
+        .mode-panel-copy { color: #b7c9c0; font-size: 13px; line-height: 1.55; }
+        .mission-current { display: grid; gap: 8px; padding: 12px; background: rgba(104, 211, 145, 0.08); border: 1px solid rgba(104, 211, 145, 0.42); border-radius: 6px; }
+        .mission-current strong { color: #ffffff; font-size: 14px; }
+        .mission-current span { color: #dbe7df; font-size: 13px; line-height: 1.5; }
+        .mission-rules { display: grid; gap: 6px; padding: 10px; background: #171b1a; border: 1px solid #34423a; border-radius: 6px; color: #b7c9c0; font-size: 12px; line-height: 1.45; }
+        .mission-rules strong { color: #7cc7ff; }
+        .mission-feedback { display: grid; gap: 6px; padding: 12px; border-radius: 6px; border: 1px solid #34423a; background: #171b1a; color: #dbe7df; font-size: 13px; line-height: 1.45; }
+        .mission-feedback.passed { border-color: rgba(104, 211, 145, 0.72); background: rgba(104, 211, 145, 0.08); }
+        .mission-feedback.failed { border-color: rgba(244, 201, 93, 0.72); background: rgba(244, 201, 93, 0.08); }
+        .mission-feedback strong { color: #ffffff; }
+        .mission-feedback .ok { color: #68d391; }
+        .mission-feedback .fix { color: #f4c95d; }
+        .mission-criterion-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+        .mission-fix-answer { grid-column: 1 / -1; padding: 9px 10px; border-radius: 6px; background: rgba(0,0,0,0.22); color: #e7f2ec; font-size: 12px; line-height: 1.5; }
+        .mini-fix-button { min-height: 30px; background: #252d2a; color: #e7f2ec; border: 1px solid #3f4e46; padding: 6px 9px; font-size: 11px; font-weight: 800; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+        .mini-fix-button:hover { background: #2d3833; }
+        .mode-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+        .mission-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+        .mission-card { display: grid; gap: 7px; text-align: left; background: #171b1a; border: 1px solid #34423a; color: #dbe7df; border-radius: 6px; padding: 10px; cursor: pointer; min-height: 96px; }
+        .mission-card:hover:not(:disabled) { border-color: #7cc7ff; background: #1b2221; }
+        .mission-card.active { border-color: #68d391; box-shadow: inset 0 0 0 1px rgba(104, 211, 145, 0.34); }
+        .mission-card.completed { border-color: #7cc7ff; }
+        .mission-card:disabled { opacity: 0.45; cursor: not-allowed; }
+        .mission-card strong { color: #ffffff; font-size: 13px; line-height: 1.3; }
+        .mission-card span { color: #91a39a; font-size: 12px; line-height: 1.35; }
+        .skill-grid { display: grid; gap: 9px; }
+        .skill-row { display: grid; grid-template-columns: minmax(110px, 0.45fr) 1fr auto; gap: 10px; align-items: center; color: #dbe7df; font-size: 12px; }
+        .skill-track { height: 8px; background: #26302c; border-radius: 999px; overflow: hidden; }
+        .skill-fill { height: 100%; background: linear-gradient(90deg, #68d391, #7cc7ff); border-radius: inherit; }
+        .debug-line-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; }
+        .debug-activity { display: grid; gap: 10px; padding: 12px; background: #171b1a; border: 1px solid #34423a; border-radius: 6px; }
+        .bug-line-button { min-height: 34px; background: #171b1a; border: 1px solid #3f4e46; border-radius: 6px; color: #dbe7df; font-family: Consolas, "SFMono-Regular", monospace; cursor: pointer; }
+        .bug-line-button.selected { border-color: #f4c95d; background: rgba(244, 201, 93, 0.12); color: #ffffff; }
+        .mode-textarea { width: 100%; min-height: 70px; resize: vertical; background: #171b1a; color: #ffffff; border: 1px solid #3f4e46; border-radius: 6px; padding: 9px 10px; font-size: 13px; outline: none; }
+        .mode-textarea:focus { border-color: #7cc7ff; box-shadow: 0 0 0 3px rgba(124, 199, 255, 0.12); }
+        .mode-feedback { min-height: 18px; color: #91a39a; font-size: 12px; line-height: 1.45; }
+        .mode-feedback.good { color: #68d391; font-weight: 700; }
+        .mode-feedback.needs-work { color: #f4c95d; font-weight: 700; }
+        .walkthrough-steps { display: grid; gap: 8px; padding: 10px; background: #171b1a; border: 1px solid #34423a; border-radius: 6px; }
+        .walkthrough-step { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; color: #b7c9c0; font-size: 12px; line-height: 1.45; }
+        .walkthrough-step strong { color: #7cc7ff; }
+        .walkthrough-banner { display: grid; gap: 7px; padding: 10px; border: 1px solid rgba(124, 199, 255, 0.56); background: rgba(124, 199, 255, 0.08); border-radius: 6px; color: #dbe7df; font-size: 12px; line-height: 1.5; }
+        .review-checklist { display: grid; gap: 8px; }
+        .review-option { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; color: #dbe7df; font-size: 13px; line-height: 1.45; }
+        .review-option input { margin-top: 3px; accent-color: #7cc7ff; }
+        .quality-grid { display: grid; gap: 7px; }
+        .quality-item { display: flex; justify-content: space-between; gap: 10px; padding: 7px 9px; border-radius: 6px; background: #171b1a; color: #dbe7df; font-size: 12px; }
+        .quality-item.pass span:last-child { color: #68d391; font-weight: 800; }
+        .quality-item.fix span:last-child { color: #f4c95d; font-weight: 800; }
+        section.dashboard-view { display: none; gap: 18px; }
+        body.dashboard-active .focus-rules,
+        body.dashboard-active .top-row,
+        body.dashboard-active .info-row,
+        body.dashboard-active .practice-layout { display: none; }
+        body.dashboard-active section.dashboard-view { display: grid; }
+        .dashboard-grid { display: grid; grid-template-columns: minmax(320px, 0.8fr) minmax(420px, 1.2fr); gap: 18px; align-items: start; }
+        .progress-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .progress-table th, .progress-table td { border-bottom: 1px solid #34423a; padding: 10px; text-align: left; color: #dbe7df; }
+        .progress-table th { color: #91a39a; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px; }
+        .skill-cloud { display: flex; flex-wrap: wrap; gap: 10px; }
+        .skill-cloud span { border: 1px solid #34423a; background: #101312; border-radius: 999px; padding: 8px 12px; color: #dbe7df; font-weight: 800; }
+        .dashboard-stat { display: grid; gap: 4px; padding: 12px; background: #101312; border: 1px solid #34423a; border-radius: 6px; }
+        .dashboard-stat strong { color: #ffffff; font-size: 22px; }
+        .dashboard-stat span { color: #91a39a; font-size: 12px; }
 
-        .timeline-panel { display: grid; }
+        .timeline-panel { display: grid; align-self: stretch; }
         .timeline-body { display: grid; gap: 14px; padding: 16px; }
         .slider-control { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: center; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: #334139; height: 6px; border-radius: 999px; outline: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 17px; height: 17px; border-radius: 50%; background: #68d391; border: 2px solid #101312; cursor: pointer; }
         .step-counter { color: #68d391; font-family: Consolas, "SFMono-Regular", monospace; font-size: 13px; font-weight: 700; min-width: 54px; text-align: right; }
         .trace-layout { display: grid; grid-template-columns: minmax(260px, 0.8fr) minmax(360px, 1.2fr); gap: 14px; align-items: stretch; }
+        .trace-layout.prediction-only { grid-template-columns: 1fr; }
         .trace-box { min-height: 190px; background: #101312; border: 1px solid #34423a; border-radius: 8px; overflow: hidden; }
+        .trace-box.hidden-for-prediction { display: none; }
         .box-title { padding: 10px 12px; background: #202724; border-bottom: 1px solid #34423a; color: #b7c9c0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; }
         .scope-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 12px; }
         .variable-card { background: #171b1a; border: 1px solid #34423a; border-radius: 6px; padding: 10px; font-size: 12px; font-family: Consolas, "SFMono-Regular", monospace; min-width: 0; }
+        .variable-card.changed { box-shadow: 0 0 0 2px rgba(244, 201, 93, 0.22); }
         .variable-card .name, .variable-card .value { overflow-wrap: anywhere; }
         .console-container { padding: 12px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 13px; min-height: 148px; max-height: 280px; overflow-y: auto; color: #e7f2ec; }
         .console-row { margin-bottom: 7px; white-space: pre-wrap; word-break: break-word; }
@@ -92,6 +160,14 @@
         .console-row.trace-output-label { color: #91a39a; border-top: 1px solid #34423a; margin-top: 10px; padding-top: 8px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px; }
         .console-row.trace-explanation { color: #dbe7df; line-height: 1.58; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
         .console-row.trace-explanation code { background: rgba(255,255,255,0.06); padding: 2px 4px; border-radius: 3px; font-family: Consolas, "SFMono-Regular", monospace; }
+        .prediction-lab { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(150px, 220px) auto auto; gap: 10px; align-items: center; padding: 12px; background: #101312; border: 1px solid #34423a; border-radius: 8px; }
+        .prediction-prompt { color: #dbe7df; font-size: 13px; line-height: 1.45; }
+        .prediction-input { width: 100%; min-height: 36px; background: #171b1a; color: #ffffff; border: 1px solid #3f4e46; border-radius: 6px; padding: 8px 10px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 13px; outline: none; }
+        .prediction-input:focus { border-color: #68d391; box-shadow: 0 0 0 3px rgba(104, 211, 145, 0.14); }
+        .prediction-feedback { grid-column: 1 / -1; min-height: 18px; color: #91a39a; font-size: 12px; line-height: 1.45; }
+        .prediction-feedback.good { color: #68d391; font-weight: 700; }
+        .prediction-feedback.needs-work { color: #f4c95d; font-weight: 700; }
+        .prediction-feedback.muted { color: #91a39a; }
 
         .utility-hidden { display: none; }
         .guide-overlay { position: fixed; inset: 0; display: none; background: transparent; z-index: 20; pointer-events: none; }
@@ -103,16 +179,34 @@
         .guide-step { color: #91a39a; font-size: 12px; font-family: Consolas, "SFMono-Regular", monospace; }
         .guide-actions { display: flex; gap: 10px; }
         .guide-focus { position: relative; outline: 2px solid #68d391; outline-offset: 4px; box-shadow: 0 0 0 6px rgba(104, 211, 145, 0.13); z-index: 2; scroll-margin: 120px; }
+        body.presentation-mode { padding: 10px; background: #080b0a; }
+        body.presentation-mode .container { width: min(1680px, 100%); gap: 10px; }
+        body.presentation-mode .top-row,
+        body.presentation-mode .info-row { display: none; }
+        body.presentation-mode .header { position: sticky; top: 0; z-index: 12; background: #080b0a; border-bottom: 1px solid #34423a; padding: 8px 0 10px; }
+        body.presentation-mode .header h1::after { content: " - Focus"; color: #68d391; }
+        body.presentation-mode .header-actions .secondary-btn:not(#btn-presentation-mode) { display: none; }
+        body.presentation-mode .focus-rules { display: grid; gap: 6px; padding: 10px 12px; background: #101312; border: 1px solid #34423a; border-radius: 8px; color: #b7c9c0; font-size: 12px; line-height: 1.45; }
+        body.presentation-mode .focus-rules strong { color: #7cc7ff; }
+        body.presentation-mode .mission-panel-rules { display: none; }
+        body.presentation-mode .workspace-body { height: var(--workspace-height, 252px); }
+        body.presentation-mode .task-content { min-height: 0; }
+        body.presentation-mode .console-container { max-height: 420px; }
+
+        @media (max-width: 1180px) {
+            .practice-layout { grid-template-columns: 1fr; }
+            .exercise-panel { grid-column: auto; }
+        }
 
         @media (max-width: 980px) {
             body { padding: 14px; }
             .header { align-items: flex-start; flex-direction: column; }
-            .top-row, .info-row, .practice-layout, .trace-layout { grid-template-columns: 1fr; }
-            .workspace-body, .task-content { min-height: 0; height: auto; }
-            .workspace-body { height: 360px; }
+            .header-actions, .top-row, .info-row, .practice-layout, .trace-layout, .prediction-lab { grid-template-columns: 1fr; width: 100%; }
+            .workspace-body, .task-content { min-height: 0; }
+            .workspace-body { height: var(--workspace-height, 156px); }
             .slider-control { grid-template-columns: 1fr; }
             .step-counter { text-align: left; }
-            .final-question { grid-template-columns: 1fr; }
+            .dashboard-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -123,32 +217,38 @@
         <div>
             <h1>Python Trace Practice Board</h1>
         </div>
-        <button class="secondary-btn" id="btn-open-guide">Guide</button>
+        <div class="header-actions">
+            <button class="secondary-btn view-tab active" id="btn-practice-view" type="button">Practice</button>
+            <button class="secondary-btn view-tab" id="btn-dashboard-view" type="button">Dashboard</button>
+            <button class="secondary-btn" id="btn-export-report" type="button">Export Report</button>
+            <button class="secondary-btn" id="btn-presentation-mode" type="button">Focus Mode</button>
+            <button class="secondary-btn" id="btn-open-guide" type="button">Guide</button>
+        </div>
     </div>
 
+    <section class="focus-rules" aria-label="Practice rules">
+        <div><strong>Goal:</strong> complete Level 1 to Level 5 in order for the selected topic.</div>
+        <div><strong>How to complete a level:</strong> fix the code, then click Compile & Run.</div>
+        <div><strong>Auto-check:</strong> the app marks a level Completed automatically when Compile & Run meets all task checks.</div>
+    </section>
+
     <section class="top-row" aria-label="Task selection">
-        <div class="flow-field">
-            <label class="field-label" for="lesson-select">Topic</label>
+        <div class="flow-field mode-field">
+            <label class="field-label" for="mode-select">Learning Mode</label>
+            <select class="mode-select" id="mode-select"></select>
+        </div>
+        <div class="flow-field topic-field" id="topic-field">
+            <label class="field-label" for="lesson-select">Practice Topic</label>
             <select class="lesson-select" id="lesson-select"></select>
         </div>
-        <div class="flow-field">
+        <div class="flow-field task-field" id="task-field">
             <label class="field-label" for="example-select">Practice Task</label>
             <select class="example-select" id="example-select">
                 <option value="accumulator-main">Build the sum</option>
             </select>
         </div>
-        <button class="secondary-btn" id="btn-reset-view" type="button" hidden>Reset</button>
-    </section>
-
-    <section class="info-row">
-        <section class="surface" id="knowledge-panel">
-            <div class="surface-header">Knowledge Point</div>
-            <div class="surface-body" id="topic-brief"></div>
-        </section>
-        <section class="surface" id="algorithm-panel">
-            <div class="surface-header">Programming Algorithm</div>
-            <div class="surface-body" id="algorithm-intro"></div>
-        </section>
+        <button class="secondary-btn danger-btn" id="btn-reset-view" type="button">Reset Progress</button>
+        <div class="mode-context" id="mode-context"></div>
     </section>
 
     <section class="practice-layout">
@@ -157,7 +257,7 @@
                 <span id="editor-title">Code</span>
                 <button class="btn" id="btn-run">Compile & Run</button>
             </div>
-            <div class="workspace-body">
+            <div class="workspace-body" id="workspace-body">
                 <div class="gutter-zone" id="gutter-zone"></div>
                 <div class="editor-stage">
                     <textarea class="code-editor" id="code-input" spellcheck="false" wrap="off">total_sum = 0
@@ -170,30 +270,54 @@ for number in numbers:
             </div>
         </section>
 
+        <section class="surface timeline-panel" id="timeline-panel">
+            <div class="surface-header">Run Timeline</div>
+            <div class="timeline-body">
+                <div class="slider-control">
+                    <input type="range" id="trace-slider" min="0" max="0" value="0" disabled>
+                    <span class="step-counter" id="step-counter">0/0</span>
+                </div>
+                <div class="prediction-lab" id="prediction-lab">
+                    <div class="prediction-prompt" id="prediction-prompt">Run code to make a prediction.</div>
+                    <input class="prediction-input" id="prediction-input" type="text" autocomplete="off" placeholder="Predicted value">
+                    <button class="secondary-btn" id="btn-check-prediction" type="button">Check</button>
+                    <button class="secondary-btn" id="btn-reveal-answer" type="button" disabled>Reveal</button>
+                    <div class="prediction-feedback" id="prediction-feedback"></div>
+                </div>
+                <div class="trace-layout" id="trace-layout">
+                    <div class="trace-box" id="variables-box">
+                        <div class="box-title">Variables</div>
+                        <div class="scope-grid" id="scope-grid"></div>
+                    </div>
+                    <div class="trace-box">
+                        <div class="box-title">Step Explanation</div>
+                        <div class="console-container" id="console-output"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="surface exercise-panel">
-            <div class="surface-header">Practice Task</div>
+            <div class="surface-header" id="exercise-panel-title">Practice Path</div>
             <div class="surface-body task-content" id="lesson-goal"></div>
         </section>
     </section>
 
-    <section class="surface timeline-panel" id="timeline-panel">
-        <div class="surface-header">Run Timeline</div>
-        <div class="timeline-body">
-            <div class="slider-control">
-                <input type="range" id="trace-slider" min="0" max="0" value="0" disabled>
-                <span class="step-counter" id="step-counter">0/0</span>
-            </div>
-            <div class="trace-layout">
-                <div class="trace-box">
-                    <div class="box-title">Variables</div>
-                    <div class="scope-grid" id="scope-grid"></div>
-                </div>
-                <div class="trace-box">
-                    <div class="box-title">Step Explanation</div>
-                    <div class="console-container" id="console-output"></div>
+    <section class="dashboard-view" id="dashboard-view" aria-label="Learning dashboard">
+        <section class="surface">
+            <div class="surface-header">Learning Dashboard</div>
+            <div class="surface-body dashboard-grid">
+                <div id="dashboard-summary"></div>
+                <div>
+                    <div class="mode-panel-title" style="margin-bottom: 10px;">Skill Cloud</div>
+                    <div class="skill-cloud" id="dashboard-skill-cloud"></div>
                 </div>
             </div>
-        </div>
+        </section>
+        <section class="surface">
+            <div class="surface-header">Topic Progress</div>
+            <div class="surface-body" id="dashboard-topic-table"></div>
+        </section>
     </section>
 </div>
 
@@ -202,13 +326,6 @@ for number in numbers:
     <div id="lesson-status"></div>
     <div id="concept-panel"></div>
     <div id="teacher-insights"></div>
-    <button id="btn-export-report" type="button"></button>
-    <button id="btn-presentation-mode" type="button"></button>
-    <input id="prediction-input" type="text">
-    <div id="prediction-prompt"></div>
-    <div id="prediction-feedback"></div>
-    <button id="btn-check-prediction" type="button"></button>
-    <button id="btn-reveal-answer" type="button"></button>
 </div>
 
 <div class="guide-overlay" id="guide-overlay" aria-modal="true" role="dialog">
@@ -226,6 +343,6 @@ for number in numbers:
     </div>
 </div>
 
-<script src="app.js?v=difficulty-topics-20260613"></script>
+    <script src="app.js?v=student-path-dashboard-v5-20260616"></script>
 </body>
 </html>
