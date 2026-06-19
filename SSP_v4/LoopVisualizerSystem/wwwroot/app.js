@@ -32,6 +32,33 @@ const SKILL_PROGRESS_KEY = "ssp_v11_skill_progress";
 const TOPIC_BATCH_KEY = "ssp_v11_topic_batches";
 const BRIGHT_PALETTE = ["#ff7b72", "#3fb950", "#d29922", "#a5d6ff", "#f274c5", "#58a6ff", "#ffc600", "#e2a6ff"];
 const STUDENT_TOPIC_ORDER = ["assignment", "ifElse", "forLoop", "whileLoop", "listTraversal", "accumulator", "nestedLoop", "functionCall", "recursion", "complex"];
+const KNOWLEDGE_MAP_POINTS = [
+    { topicId: "assignment", x: 120, y: 92 },
+    { topicId: "ifElse", x: 310, y: 76 },
+    { topicId: "forLoop", x: 310, y: 192 },
+    { topicId: "whileLoop", x: 310, y: 308 },
+    { topicId: "listTraversal", x: 520, y: 176 },
+    { topicId: "accumulator", x: 690, y: 176 },
+    { topicId: "nestedLoop", x: 520, y: 318 },
+    { topicId: "functionCall", x: 690, y: 72 },
+    { topicId: "recursion", x: 855, y: 72 },
+    { topicId: "complex", x: 855, y: 260 }
+];
+const KNOWLEDGE_MAP_LINKS = [
+    ["assignment", "ifElse"],
+    ["assignment", "forLoop"],
+    ["assignment", "functionCall"],
+    ["forLoop", "whileLoop"],
+    ["forLoop", "listTraversal"],
+    ["forLoop", "accumulator"],
+    ["listTraversal", "accumulator"],
+    ["listTraversal", "nestedLoop"],
+    ["functionCall", "recursion"],
+    ["ifElse", "complex"],
+    ["accumulator", "complex"],
+    ["nestedLoop", "complex"],
+    ["recursion", "complex"]
+];
 
 const LESSONS = {
     assignment: {
@@ -5699,22 +5726,8 @@ function renderDashboard() {
                 : "All levels complete";
             return { ...tree, nextLevelLabel };
         });
-    const totalLevels = topicTrees.reduce((sum, topic) => sum + topic.totalCount, 0);
-    const completedLevels = topicTrees.reduce((sum, topic) => sum + topic.completedCount, 0);
-    const totalTasks = topicTrees.reduce((sum, topic) => sum + topic.taskCount, 0);
-    const completedTasks = topicTrees.reduce((sum, topic) => sum + topic.completedTaskCount, 0);
-    const skillProgress = getSkillProgress();
-    const trainedSkills = Object.values(skillProgress).filter(value => value > 0).length;
-    const overallPercent = totalLevels ? Math.round((completedLevels / totalLevels) * 100) : 0;
-
-    dashboardSummary.innerHTML = `
-        <div class="dashboard-grid" style="grid-template-columns: repeat(2, minmax(140px, 1fr));">
-            <div class="dashboard-stat"><strong>${completedLevels}/${totalLevels}</strong><span>Levels completed</span></div>
-            <div class="dashboard-stat"><strong>${completedTasks}/${totalTasks}</strong><span>Task leaves lit</span></div>
-            <div class="dashboard-stat"><strong>${trainedSkills}</strong><span>Skills touched</span></div>
-            <div class="dashboard-stat"><strong>${overallPercent}%</strong><span>Tree growth</span></div>
-        </div>
-    `;
+    dashboardSummary.innerHTML = "";
+    dashboardSummary.hidden = true;
 
     dashboardSkillCloud.innerHTML = renderPracticePatternTree(topicTrees);
 
@@ -5820,19 +5833,16 @@ function renderQuestionBankTask(topicId, task, completed = getCompletedMissions(
 function renderPracticePatternTree(topicTrees) {
     const layout = buildPracticePatternTreeLayout(topicTrees);
     const links = layout.links.map(link => renderPracticeTreeLink(link)).join("");
-    const taskNodes = layout.tasks.map(node => renderPracticeTreeNode(node)).join("");
-    const levelNodes = layout.levels.map(node => renderPracticeTreeNode(node)).join("");
     const topicNodes = layout.topics.map(node => renderPracticeTreeNode(node)).join("");
-    const rootNode = renderPracticeTreeNode(layout.root);
 
     return `
         <div class="practice-tree-panel">
-            <div class="practice-tree-copy">Root -> Practice Pattern -> Level -> Task. The diagram is generated from the same topic, level, and task data used by Practice Path.</div>
-            <div class="practice-tree-scroll" aria-label="Practice pattern tree">
-                <svg class="practice-tree-svg" viewBox="0 0 ${layout.width} ${layout.height}" role="img" aria-label="Practice pattern learning tree">
+            <div class="practice-tree-copy">Knowledge Map shows how practice topics connect. A topic lights up after its current Level 1-5 training batch is complete; detailed Level progress stays in Learning Tree below.</div>
+            <div class="practice-tree-scroll" aria-label="Knowledge map">
+                <svg class="practice-tree-svg" viewBox="0 0 ${layout.width} ${layout.height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Programming knowledge map">
                     <rect class="practice-tree-bg" x="0" y="0" width="${layout.width}" height="${layout.height}" rx="12"></rect>
                     <g class="practice-tree-links">${links}</g>
-                    <g class="practice-tree-nodes">${rootNode}${topicNodes}${levelNodes}${taskNodes}</g>
+                    <g class="practice-tree-nodes">${topicNodes}</g>
                 </svg>
             </div>
         </div>
@@ -5840,124 +5850,198 @@ function renderPracticePatternTree(topicTrees) {
 }
 
 function buildPracticePatternTreeLayout(topicTrees) {
-    const rootY = 60;
-    const topicY = 164;
-    const levelY = 304;
-    const taskY = 438;
-    const sidePadding = 110;
-    const topicGap = 70;
-    const taskGap = 42;
-    const minLevelWidth = 100;
+    const width = 1000;
+    const height = 400;
     const links = [];
     const topics = [];
-    const levels = [];
-    const tasks = [];
-    const topicLayouts = topicTrees.map(topic => {
-        const levelWidths = topic.levels.map(level => Math.max(minLevelWidth, level.taskCount * taskGap + 34));
-        const width = Math.max(320, levelWidths.reduce((sum, value) => sum + value, 0) + 64);
-        return { topic, levelWidths, width };
-    });
-    const width = Math.max(1180, sidePadding * 2 + topicLayouts.reduce((sum, item) => sum + item.width, 0) + Math.max(0, topicLayouts.length - 1) * topicGap);
-    const maxTasksInLevel = Math.max(1, ...topicTrees.flatMap(topic => topic.levels.map(level => level.taskCount || 1)));
-    const height = taskY + 112 + Math.max(0, maxTasksInLevel - 4) * 16;
-    const root = {
-        kind: "root",
-        x: width / 2,
-        y: rootY,
-        r: 24,
-        label: "Start",
-        subLabel: `${topicTrees.length} patterns`,
-        state: topicTrees.every(topic => topic.isComplete) ? "done" : "next"
-    };
+    const topicMap = new Map(topicTrees.map(topic => [topic.topicId, topic]));
+    const pointMap = new Map(KNOWLEDGE_MAP_POINTS.map(point => [point.topicId, point]));
+    const nodeMap = new Map();
 
-    let cursor = sidePadding;
-    topicLayouts.forEach(({ topic, levelWidths, width: topicWidth }) => {
-        const topicCenterX = cursor + topicWidth / 2;
+    topicTrees.forEach((topic, topicIndex) => {
+        const point = pointMap.get(topic.topicId) || getFallbackKnowledgeMapPoint(topicIndex, width, height);
         const topicState = topic.isComplete ? "done" : topic.isActive ? "next" : "ready";
         const topicNode = {
             kind: "topic",
-            x: topicCenterX,
-            y: topicY,
-            r: 18,
-            label: truncateLabel(topic.title, 18),
-            subLabel: `${topic.completedTaskCount}/${topic.taskCount}`,
+            x: point.x,
+            y: point.y,
+            w: 138,
+            h: 54,
+            label: topic.title,
             title: topic.title,
-            state: topicState
+            state: topicState,
+            topicId: topic.topicId,
+            isComplete: topic.isComplete,
+            isActive: topic.isActive
         };
         topics.push(topicNode);
-        links.push({ from: root, to: topicNode, state: topicState === "locked" ? "locked" : topicState });
-
-        let levelCursor = cursor + (topicWidth - levelWidths.reduce((sum, value) => sum + value, 0)) / 2;
-        topic.levels.forEach((level, levelIndex) => {
-            const levelWidth = levelWidths[levelIndex];
-            const levelX = levelCursor + levelWidth / 2;
-            const levelState = level.isComplete ? "done" : level.isCurrent ? "next" : level.isReady ? "ready" : "locked";
-            const levelNode = {
-                kind: "level",
-                x: levelX,
-                y: levelY,
-                r: 15,
-                label: `L${level.level}`,
-                subLabel: `${level.completedCount}/${level.taskCount}`,
-                title: `${topic.title} - Level ${level.level}: ${level.stage}`,
-                state: levelState
-            };
-            levels.push(levelNode);
-            links.push({ from: topicNode, to: levelNode, state: levelState });
-
-            level.tasks.forEach((item, taskIndex) => {
-                const taskX = levelX + (taskIndex - (level.tasks.length - 1) / 2) * taskGap;
-                const taskState = item.completed ? "done" : item.current ? "next" : item.ready ? "ready" : "locked";
-                const taskNode = {
-                    kind: "task",
-                    x: taskX,
-                    y: taskY,
-                    r: 9,
-                    label: String(taskIndex + 1),
-                    subLabel: "",
-                    title: `${topic.title} - Level ${level.level}: ${item.task.title}`,
-                    state: taskState,
-                    topicId: topic.topicId,
-                    taskId: item.task.id,
-                    ready: item.ready
-                };
-                tasks.push(taskNode);
-                links.push({ from: levelNode, to: taskNode, state: taskState });
-            });
-
-            levelCursor += levelWidth;
-        });
-
-        cursor += topicWidth + topicGap;
+        nodeMap.set(topic.topicId, topicNode);
     });
 
-    return { root, topics, levels, tasks, links, width: Math.round(width), height };
+    KNOWLEDGE_MAP_LINKS.forEach(([sourceId, targetId]) => {
+        const sourceNode = nodeMap.get(sourceId);
+        const targetNode = nodeMap.get(targetId);
+        if (!sourceNode || !targetNode) return;
+
+        const sourceTopic = topicMap.get(sourceId);
+        const targetTopic = topicMap.get(targetId);
+        const state = sourceTopic?.isActive || targetTopic?.isActive
+            ? "next"
+            : sourceTopic?.isComplete && targetTopic?.isComplete
+                ? "done"
+                : targetTopic?.nextLevel
+                    ? "ready"
+                    : "locked";
+        links.push({
+            from: sourceNode,
+            to: targetNode,
+            sourceId,
+            targetId,
+            state
+        });
+    });
+
+    return { topics, links, width, height };
 }
 
 function renderPracticeTreeLink(link) {
-    const midY = (link.from.y + link.to.y) / 2;
-    const d = `M ${link.from.x} ${link.from.y + link.from.r} C ${link.from.x} ${midY}, ${link.to.x} ${midY}, ${link.to.x} ${link.to.y - link.to.r}`;
-    return `<path class="practice-tree-link ${escapeHtml(link.state)}" d="${d}"></path>`;
+    const from = getKnowledgeMapEdgePoint(link.from, link.to);
+    const to = getKnowledgeMapEdgePoint(link.to, link.from);
+    const horizontal = Math.abs(to.x - from.x) >= Math.abs(to.y - from.y);
+    const d = horizontal
+        ? `M ${from.x} ${from.y} C ${from.x + (to.x - from.x) * 0.48} ${from.y}, ${to.x - (to.x - from.x) * 0.48} ${to.y}, ${to.x} ${to.y}`
+        : `M ${from.x} ${from.y} C ${from.x} ${from.y + (to.y - from.y) * 0.48}, ${to.x} ${to.y - (to.y - from.y) * 0.48}, ${to.x} ${to.y}`;
+    return `<path class="practice-tree-link ${escapeHtml(link.state)}" data-map-source="${escapeHtml(link.sourceId)}" data-map-target="${escapeHtml(link.targetId)}" d="${d}"></path>`;
 }
 
 function renderPracticeTreeNode(node) {
-    const dataAttrs = node.kind === "task"
-        ? ` data-pattern-topic="${escapeHtml(node.topicId)}" data-pattern-task="${escapeHtml(node.taskId)}" data-pattern-ready="${node.ready ? "true" : "false"}"`
+    const dataAttrs = node.kind === "topic"
+        ? ` data-pattern-topic="${escapeHtml(node.topicId)}" data-map-topic="${escapeHtml(node.topicId)}"`
         : "";
-    const labelY = node.y + node.r + (node.kind === "task" ? 17 : 18);
-    const subLabel = node.subLabel
-        ? `<text class="practice-tree-sub-label" x="${node.x}" y="${labelY + 13}">${escapeHtml(node.subLabel)}</text>`
-        : "";
+    const circleLabel = node.nodeLabel || node.label;
+    const labelMarkup = renderPracticeTreeNodeLabel(node, circleLabel);
+    const rectX = node.x - node.w / 2;
+    const rectY = node.y - node.h / 2;
+    const statusLabel = node.state === "done"
+        ? "Complete"
+        : node.state === "next"
+            ? "Current"
+            : node.state === "locked"
+                ? "Locked"
+                : "Ready";
 
     return `
         <g class="practice-tree-node ${escapeHtml(node.kind)} ${escapeHtml(node.state)}"${dataAttrs}>
-            <title>${escapeHtml(node.title || node.label)}</title>
-            <circle cx="${node.x}" cy="${node.y}" r="${node.r}"></circle>
-            <text class="practice-tree-node-label" x="${node.x}" y="${node.y + 4}">${escapeHtml(node.label)}</text>
-            ${node.kind === "task" ? "" : `<text class="practice-tree-label" x="${node.x}" y="${labelY}">${escapeHtml(node.label)}</text>`}
-            ${subLabel}
+            <title>${escapeHtml(node.title || node.label)} - ${escapeHtml(statusLabel)}</title>
+            <rect class="practice-tree-hit-area" x="${rectX - 8}" y="${rectY - 8}" width="${node.w + 16}" height="${node.h + 16}" rx="10"></rect>
+            <rect class="practice-tree-node-card" x="${rectX}" y="${rectY}" width="${node.w}" height="${node.h}" rx="8"></rect>
+            <circle class="practice-tree-status-dot" cx="${rectX + 14}" cy="${node.y}" r="5"></circle>
+            ${labelMarkup}
         </g>
     `;
+}
+
+function renderPracticeTreeNodeLabel(node, label) {
+    const lines = wrapSvgLabel(label, 16, 2);
+    const lineHeight = 13;
+    const firstY = node.y - ((lines.length - 1) * lineHeight) / 2 + 4;
+    const spans = lines.map((line, index) => {
+        const dy = index === 0 ? 0 : lineHeight;
+        return `<tspan x="${node.x + 8}" dy="${dy}">${escapeHtml(line)}</tspan>`;
+    }).join("");
+    return `<text class="practice-tree-node-label topic-name" x="${node.x + 8}" y="${firstY}">${spans}</text>`;
+}
+
+function getKnowledgeMapEdgePoint(node, other) {
+    const dx = other.x - node.x;
+    const dy = other.y - node.y;
+    if (Math.abs(dx) > Math.abs(dy)) {
+        const x = node.x + Math.sign(dx || 1) * (node.w / 2);
+        const y = node.y + clamp(dy * 0.2, -node.h / 2 + 8, node.h / 2 - 8);
+        return { x, y };
+    }
+    const x = node.x + clamp(dx * 0.2, -node.w / 2 + 12, node.w / 2 - 12);
+    const y = node.y + Math.sign(dy || 1) * (node.h / 2);
+    return { x, y };
+}
+
+function getFallbackKnowledgeMapPoint(index, width, height) {
+    const columns = 4;
+    const x = 120 + (index % columns) * 240;
+    const y = 80 + Math.floor(index / columns) * 120;
+    return { x: Math.min(width - 120, x), y: Math.min(height - 70, y) };
+}
+
+function setKnowledgeMapHover(topicId) {
+    const svg = dashboardSkillCloud?.querySelector(".practice-tree-svg");
+    if (!svg || !topicId) return;
+
+    const relatedTopics = new Set([topicId]);
+    svg.querySelectorAll(".practice-tree-link").forEach(link => {
+        const sourceId = link.dataset.mapSource;
+        const targetId = link.dataset.mapTarget;
+        const isRelated = sourceId === topicId || targetId === topicId;
+        link.classList.toggle("is-focused", isRelated);
+        link.classList.toggle("is-muted", !isRelated);
+        if (isRelated) {
+            if (sourceId) relatedTopics.add(sourceId);
+            if (targetId) relatedTopics.add(targetId);
+        }
+    });
+
+    svg.querySelectorAll(".practice-tree-node.topic").forEach(node => {
+        const nodeTopicId = node.dataset.mapTopic;
+        const isHovered = nodeTopicId === topicId;
+        const isNeighbor = relatedTopics.has(nodeTopicId);
+        node.classList.toggle("is-hovered", isHovered);
+        node.classList.toggle("is-neighbor", !isHovered && isNeighbor);
+        node.classList.toggle("is-muted", !isNeighbor);
+    });
+    svg.classList.add("is-focusing");
+}
+
+function clearKnowledgeMapHover() {
+    const svg = dashboardSkillCloud?.querySelector(".practice-tree-svg");
+    if (!svg) return;
+
+    svg.classList.remove("is-focusing");
+    svg.querySelectorAll(".is-hovered, .is-neighbor, .is-muted, .is-focused").forEach(element => {
+        element.classList.remove("is-hovered", "is-neighbor", "is-muted", "is-focused");
+    });
+}
+
+function wrapSvgLabel(label, maxChars = 10, maxLines = 3) {
+    const words = String(label || "").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let current = "";
+
+    words.forEach(word => {
+        if (!current) {
+            current = word;
+            return;
+        }
+        if (`${current} ${word}`.length <= maxChars) {
+            current = `${current} ${word}`;
+        } else {
+            lines.push(current);
+            current = word;
+        }
+    });
+    if (current) lines.push(current);
+
+    const compactLines = lines.flatMap(line => {
+        if (line.length <= maxChars + 2) return [line];
+        const chunks = [];
+        for (let index = 0; index < line.length; index += maxChars) {
+            chunks.push(line.slice(index, index + maxChars));
+        }
+        return chunks;
+    });
+
+    if (compactLines.length <= maxLines) return compactLines;
+    const visible = compactLines.slice(0, maxLines);
+    visible[maxLines - 1] = truncateLabel(visible[maxLines - 1], maxChars);
+    return visible;
 }
 
 function truncateLabel(label, maxLength) {
@@ -6699,16 +6783,21 @@ dashboardTopicTable?.addEventListener('click', (event) => {
     setActiveView("practice");
 });
 dashboardSkillCloud?.addEventListener('click', (event) => {
-    const taskNode = event.target.closest(".practice-tree-node.task");
-    if (!taskNode || taskNode.dataset.patternReady !== "true") return;
-    const topicId = taskNode.dataset.patternTopic;
-    const taskId = taskNode.dataset.patternTask;
-    if (!topicId || !taskId) return;
+    const topicNode = event.target.closest(".practice-tree-node.topic");
+    if (!topicNode) return;
+    const topicId = topicNode.dataset.patternTopic;
+    if (!topicId || !LESSONS[topicId]) return;
     activeLearningMode = "mission";
     modeSelect.value = "mission";
-    goToMissionTask(topicId, taskId);
+    setActiveLesson(topicId);
     setActiveView("practice");
 });
+dashboardSkillCloud?.addEventListener('mouseover', (event) => {
+    const topicNode = event.target.closest(".practice-tree-node.topic");
+    if (!topicNode || !dashboardSkillCloud.contains(topicNode)) return;
+    setKnowledgeMapHover(topicNode.dataset.patternTopic);
+});
+dashboardSkillCloud?.addEventListener('mouseleave', clearKnowledgeMapHover);
 window.addEventListener('resize', positionGuideCard);
 window.addEventListener('scroll', positionGuideCard, true);
 window.addEventListener('keydown', (event) => {

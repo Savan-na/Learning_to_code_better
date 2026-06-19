@@ -68,5 +68,12 @@ C:\Users\ruiji\AppData\Local\Temp\ssp-v4-build-verify\LoopVisualizerSystem.deps.
 C:\Users\ruiji\AppData\Local\Temp\ssp-v4-build-verify\LoopVisualizerSystem.runtimeconfig.json
 C:\Users\ruiji\AppData\Local\Temp\ssp-v4-build-verify\LoopVisualizerSystem.dll
 C:\Users\ruiji\AppData\Local\Temp\ssp-v4-build-verify\LoopVisualizerSystem.pdb
-D:\Desktop\test-SSP\SSP_v4\LoopVisualizerSystem\obj\Debug\net9.0\compressed\lz95sj91fw-qjyqj1075v.gz
-D:\Desktop\test-SSP\SSP_v4\LoopVisualizerSystem\obj\Debug\net9.0\compressed\8qewn01zbz-ikatqr0w2m.gz
+C:\Users\ruiji\AppData\Local\Temp\ssp-v4-dashboard-build-verify\LoopVisualizerSystem.staticwebassets.runtime.json
+C:\Users\ruiji\AppData\Local\Temp\ssp-v4-dashboard-build-verify\LoopVisualizerSystem.staticwebassets.endpoints.json
+C:\Users\ruiji\AppData\Local\Temp\ssp-v4-dashboard-build-verify\LoopVisualizerSystem.exe
+C:\Users\ruiji\AppData\Local\Temp\ssp-v4-dashboard-build-verify\LoopVisualizerSystem.deps.json
+C:\Users\ruiji\AppData\Local\Temp\ssp-v4-dashboard-build-verify\LoopVisualizerSystem.runtimeconfig.json
+C:\Users\ruiji\AppData\Local\Temp\ssp-v4-dashboard-build-verify\LoopVisualizerSystem.dll
+C:\Users\ruiji\AppData\Local\Temp\ssp-v4-dashboard-build-verify\LoopVisualizerSystem.pdb
+D:\Desktop\test-SSP\SSP_v4\LoopVisualizerSystem\obj\Debug\net9.0\compressed\8qewn01zbz-e6xanuknjb.gz
+D:\Desktop\test-SSP\SSP_v4\LoopVisualizerSystem\obj\Debug\net9.0\compressed\lz95sj91fw-lccfs5ybro.gz

@@ -158,7 +158,7 @@
         body.question-bank-active .practice-layout { display: none; }
         body.dashboard-active section.dashboard-view { display: grid; }
         body.question-bank-active section.question-bank-view { display: grid; }
-        .dashboard-grid { display: grid; grid-template-columns: minmax(320px, 0.8fr) minmax(420px, 1.2fr); gap: 18px; align-items: start; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
         .learning-tree { display: grid; gap: 14px; }
         .tree-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; color: #91a39a; font-size: 12px; line-height: 1.4; }
         .legend-item { display: inline-flex; align-items: center; gap: 6px; }
@@ -194,24 +194,34 @@
         .tree-task-text strong { color: #ffffff; font-size: 12px; line-height: 1.35; }
         .tree-task-text span { color: #91a39a; font-size: 11px; line-height: 1.35; }
         .practice-tree-panel { display: grid; gap: 10px; min-width: 0; }
-        .practice-tree-copy { color: #91a39a; font-size: 12px; line-height: 1.45; }
-        .practice-tree-scroll { width: 100%; max-height: 680px; overflow: auto; border: 1px solid #34423a; border-radius: 8px; background: #101312; }
-        .practice-tree-svg { display: block; min-width: 100%; height: auto; }
+        .practice-tree-copy { color: #91a39a; font-size: 13px; line-height: 1.45; }
+        .practice-tree-scroll { width: 100%; height: clamp(320px, 38vw, 460px); overflow: hidden; border: 1px solid #34423a; border-radius: 8px; background: #101312; }
+        .practice-tree-svg { display: block; width: 100%; height: 100%; min-width: 0; }
         .practice-tree-bg { fill: #101312; }
-        .practice-tree-link { fill: none; stroke: #34423a; stroke-width: 1.5; opacity: 0.9; }
-        .practice-tree-link.done { stroke: #68d391; stroke-width: 2.3; }
-        .practice-tree-link.next { stroke: #7cc7ff; stroke-width: 2.1; }
-        .practice-tree-link.ready { stroke: #f4c95d; stroke-width: 1.9; }
-        .practice-tree-node circle { fill: #171b1a; stroke: #3f4e46; stroke-width: 2; }
-        .practice-tree-node.done circle { fill: rgba(104, 211, 145, 0.22); stroke: #68d391; }
-        .practice-tree-node.next circle { fill: rgba(124, 199, 255, 0.18); stroke: #7cc7ff; }
-        .practice-tree-node.ready circle { fill: rgba(244, 201, 93, 0.16); stroke: #f4c95d; }
+        .practice-tree-link { fill: none; stroke: #34423a; stroke-width: 2; opacity: 0.76; transition: opacity 0.16s ease, stroke 0.16s ease, stroke-width 0.16s ease; }
+        .practice-tree-link.done { stroke: rgba(104, 211, 145, 0.72); }
+        .practice-tree-link.next { stroke: rgba(124, 199, 255, 0.86); stroke-width: 2.6; }
+        .practice-tree-link.ready { stroke: rgba(244, 201, 93, 0.62); }
+        .practice-tree-link.is-focused { stroke: #ffffff; stroke-width: 3.2; opacity: 1; filter: drop-shadow(0 0 7px rgba(124, 199, 255, 0.38)); }
+        .practice-tree-link.is-muted { opacity: 0.13; }
+        .practice-tree-node.topic { cursor: pointer; transform-box: fill-box; transform-origin: center; transition: transform 0.16s ease, opacity 0.16s ease; }
+        .practice-tree-node.topic.is-hovered { transform: scale(1.07); opacity: 1; }
+        .practice-tree-node.topic.is-neighbor { opacity: 1; }
+        .practice-tree-node.topic.is-muted { opacity: 0.28; }
+        .practice-tree-node-card { fill: #171b1a; stroke: #3f4e46; stroke-width: 1.8; transition: fill 0.16s ease, stroke 0.16s ease, stroke-width 0.16s ease, filter 0.16s ease; }
+        .practice-tree-node.done .practice-tree-node-card { fill: rgba(104, 211, 145, 0.16); stroke: #68d391; }
+        .practice-tree-node.next .practice-tree-node-card { fill: rgba(124, 199, 255, 0.14); stroke: #7cc7ff; }
+        .practice-tree-node.ready .practice-tree-node-card { fill: rgba(244, 201, 93, 0.10); stroke: #f4c95d; }
         .practice-tree-node.locked { opacity: 0.52; }
-        .practice-tree-node.task { cursor: pointer; }
-        .practice-tree-node.task.locked { cursor: not-allowed; }
-        .practice-tree-node-label { fill: #ffffff; font-size: 11px; font-weight: 900; text-anchor: middle; pointer-events: none; }
-        .practice-tree-label { fill: #dbe7df; font-size: 13px; font-weight: 800; text-anchor: middle; pointer-events: none; }
-        .practice-tree-sub-label { fill: #91a39a; font-size: 11px; text-anchor: middle; pointer-events: none; }
+        .practice-tree-node.topic.is-hovered .practice-tree-node-card { stroke: #ffffff; stroke-width: 2.6; filter: drop-shadow(0 0 10px rgba(124, 199, 255, 0.42)); }
+        .practice-tree-node.topic.is-neighbor .practice-tree-node-card { stroke: #b7c9c0; stroke-width: 2.1; }
+        .practice-tree-status-dot { fill: #3f4e46; stroke: #101312; stroke-width: 2; }
+        .practice-tree-node.done .practice-tree-status-dot { fill: #68d391; }
+        .practice-tree-node.next .practice-tree-status-dot { fill: #7cc7ff; }
+        .practice-tree-node.ready .practice-tree-status-dot { fill: #f4c95d; }
+        .practice-tree-hit-area { fill: transparent !important; stroke: transparent !important; pointer-events: all; }
+        .practice-tree-node-label { fill: #ffffff; font-size: 12px; font-weight: 900; text-anchor: middle; pointer-events: none; }
+        .practice-tree-node-label.topic-name { font-size: 11.5px; line-height: 1.15; }
         .dashboard-stat { display: grid; gap: 4px; padding: 12px; background: #101312; border: 1px solid #34423a; border-radius: 6px; }
         .dashboard-stat strong { color: #ffffff; font-size: 22px; }
         .dashboard-stat span { color: #91a39a; font-size: 12px; }
@@ -435,7 +445,7 @@ for number in numbers:
             <div class="surface-body dashboard-grid">
                 <div id="dashboard-summary"></div>
                 <div>
-                    <div class="mode-panel-title" style="margin-bottom: 10px;">Practice Pattern Tree</div>
+                    <div class="mode-panel-title" style="margin-bottom: 10px;">Knowledge Map</div>
                     <div id="dashboard-skill-cloud"></div>
                 </div>
             </div>
@@ -487,6 +497,6 @@ for number in numbers:
     </div>
 </div>
 
-    <script src="app.js?v=student-path-dashboard-v18-20260617"></script>
+    <script src="app.js?v=student-path-dashboard-v23-20260619"></script>
 </body>
 </html>
