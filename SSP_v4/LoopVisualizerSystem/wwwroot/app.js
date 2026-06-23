@@ -2801,8 +2801,8 @@ const LEARNING_MODES = {
     },
     aiReview: {
         title: "AI Code Review",
-        panelTitle: "AI Review Lab",
-        summary: "Review a prewritten AI-style answer, identify quality problems, and improve the code with trace evidence."
+        panelTitle: "AI Code Review",
+        summary: "Review a prewritten AI-style answer, identify real problems, and improve the code with trace evidence."
     },
     skillTree: {
         title: "Growth Map",
@@ -5964,7 +5964,7 @@ function syncModeShell() {
 
     if (!modeContext) return;
 
-    modeContext.innerHTML = `<strong>Practice flow:</strong> choose a Practice Topic, follow the current Level card, then click Compile & Run. Level 0 uses draggable code blocks; Level 1 uses the fill-in gate; Levels 2-5 are edited in Code.`;
+    modeContext.innerHTML = `<strong>Practice flow:</strong> choose a Practice Topic, follow the current Level card, then click Compile & Run. After that, you can use AI Code Review to diagnose code issues or Code Quality Check to compare code choices.`;
 }
 
 function getReviewLabTask(taskId = activeReviewLabTaskId) {
@@ -6102,7 +6102,7 @@ function renderReviewLab() {
         }).join("")}</optgroup>`;
     }).join("");
 
-    reviewProgressLabel.innerHTML = `<strong>${completedCount}/${REVIEW_LAB_TASKS.length} challenges demonstrated</strong>&nbsp; Each challenge records diagnosis, test design, repair, and explanation evidence.`;
+    reviewProgressLabel.innerHTML = `<strong>${completedCount}/${REVIEW_LAB_TASKS.length} challenges demonstrated</strong>&nbsp; ${task.difficulty === "Starter" ? "Starter tasks focus on the clearest first step." : "Use the current level to match how much evidence you need."}`;
     reviewRequirement.innerHTML = `
         <div>
             <h2>${escapeHtml(task.title)}</h2>
@@ -6117,14 +6117,14 @@ function renderReviewLab() {
     reviewIssueList.innerHTML = task.issueOptions.map(option => `
         <label class="review-option-row">
             <input type="checkbox" name="review-issue" value="${escapeHtml(option.id)}" ${selectedIssueIds.has(option.id) ? "checked" : ""}>
-            <span><strong>${escapeHtml(option.label)}</strong>Select only if this claim identifies a real defect or quality problem.</span>
+            <span><strong>${escapeHtml(option.label)}</strong>${escapeHtml(option.explanation || "")}</span>
         </label>
     `).join("");
 
     reviewTestList.innerHTML = task.testOptions.map(option => `
         <label class="review-option-row">
             <input type="checkbox" name="review-test" value="${escapeHtml(option.id)}" ${selectedTestIds.has(option.id) ? "checked" : ""}>
-            <span><strong>${escapeHtml(option.label)}</strong>Use this test only if it provides valid evidence for the stated contract.</span>
+            <span><strong>${escapeHtml(option.label)}</strong>${escapeHtml(option.explanation || "")}</span>
         </label>
     `).join("");
 
@@ -6241,8 +6241,8 @@ async function evaluateReviewLab() {
 
     reviewLabRunning = true;
     btnReviewEvaluate.disabled = true;
-    btnReviewEvaluate.textContent = "Running Evidence...";
-    reviewResults.innerHTML = `<div class="review-feedback-box">Running the repaired code against normal, boundary, and additional checks...</div>`;
+    btnReviewEvaluate.textContent = "Checking...";
+    reviewResults.innerHTML = `<div class="review-feedback-box">Checking the repair against the required behavior now.</div>`;
 
     let responseData = { passed: false, tests: [], error: "" };
     try {
@@ -6259,7 +6259,7 @@ async function evaluateReviewLab() {
     } finally {
         reviewLabRunning = false;
         btnReviewEvaluate.disabled = false;
-        btnReviewEvaluate.textContent = "Evaluate Review & Fix";
+        btnReviewEvaluate.textContent = "Submit Answer";
     }
 
     const runtimePassed = Boolean(responseData.passed);
@@ -6316,26 +6316,26 @@ function getReviewOptionFeedback(options, id) {
 function getReviewNextAction(result) {
     if (result.engineError) {
         return /Python 3 is not available|No installed Python/i.test(result.engineError)
-            ? "Install Python 3 and confirm python --version or py -3 --version works, then evaluate again."
-            : "Fix the first syntax or runtime error shown below before changing any later logic.";
+            ? "Install Python 3 and confirm the runtime works, then submit again."
+            : "Fix the first syntax or runtime error shown above before changing anything else.";
     }
-    if (!result.issuePassed) return "Re-read the requirement one sentence at a time, then revise the issue choices using the explanations below.";
-    if (!result.testDesignPassed) return "Add the missing boundary evidence and remove any test whose expected result is unsupported by the contract.";
+    if (!result.issuePassed) return "Re-check the requirement and update the issue choices using the feedback below.";
+    if (!result.testDesignPassed) return "Add the missing boundary evidence and remove any unsupported test choice.";
     if (!result.runtimePassed) {
         const failed = (result.tests || []).find(test => !test.passed);
-        return failed ? `Trace the case '${failed.name}' by hand, then revise the line that first produces ${failed.actual || "an error"}.` : "Run the repair against the stated boundary cases and revise the first failing behavior.";
+        return failed ? `Trace the case '${failed.name}' and fix the first behavior that still disagrees with the expected result.` : "Run the repair against the required cases and revise the first failing behavior.";
     }
-    if (!result.sourcePassed) return (result.sourceChecks || []).find(check => !check.passed)?.label || "Revise the code structure to meet the engineering constraint.";
-    if (!result.reasonPassed) return "Name the defect, identify the test that exposes it, and explain why the repaired logic now satisfies the contract.";
-    return "Move to the next challenge, or start a new attempt later to check that the reasoning remains independent.";
+    if (!result.sourcePassed) return (result.sourceChecks || []).find(check => !check.passed)?.label || "Revise the code structure so it matches the stated constraint.";
+    if (!result.reasonPassed) return "Name the defect, point to the evidence, and explain why the repair now matches the requirement.";
+    return "Move to the next challenge, or start another attempt later if you want to practice again.";
 }
 
 function renderReviewLabResult(result) {
     if (!reviewResults) return;
     if (!result) {
         reviewResults.innerHTML = `
-            <div class="review-feedback-box">
-                Select the real defects and useful tests, repair the AI-generated code, then explain why your change satisfies the requirement. Evaluation accepts different correct implementations.
+            <div class="review-feedback-pill">
+                <span>Pick the real problems, choose the right evidence, then submit your answer.</span>
             </div>
         `;
         return;
@@ -6377,44 +6377,53 @@ function renderReviewLabResult(result) {
         : `<div class="review-test-result"><strong>FIX</strong><span>${escapeHtml(result.engineError || "No test evidence was returned. Check the Python syntax and try again.")}</span></div>`;
 
     reviewResults.innerHTML = `
-        <div class="review-result-heading">
-            <strong>${result.infrastructureFailure ? "Environment not ready" : result.passed ? "Review evidence accepted" : "Revision still needed"}</strong>
-            <span>${result.infrastructureFailure ? "Not counted as an attempt" : `Attempt ${result.attemptNumber}`} · ${new Date(result.timestamp).toLocaleString()}</span>
+        <div class="review-feedback-pill ${result.passed ? "passed" : "failed"}">
+            <strong>${result.infrastructureFailure ? "Environment not ready" : result.passed ? "Evidence accepted" : "Needs revision"}</strong>
+            <span>${result.infrastructureFailure ? "No attempt recorded" : `Attempt ${result.attemptNumber}`}</span>
         </div>
-        <div class="review-feedback-box ${result.passed ? "passed" : "failed"}">
-            ${result.infrastructureFailure
-                ? "The execution service could not verify Python code. Your draft remains saved, and no student evidence or failed attempt was recorded."
-                : result.passed
-                ? "You demonstrated that the repair matches the requirement and supported it with review evidence. This challenge is now recorded on the Dashboard."
-                : "Use the evidence below to revise one decision at a time. A different implementation is welcome when it passes the behavior and structure checks."}
-        </div>
-        <div class="review-score-grid">
-            ${scoreItems.map(item => `
-                <div class="review-score-item ${item.passed ? "pass" : "fix"}">
-                    <strong>${item.passed ? "PASS" : "FIX"} · ${escapeHtml(item.label)}</strong>
-                    <span>${escapeHtml(item.detail)}</span>
+        <details class="review-feedback-details">
+            <summary>${result.passed ? "Show completed feedback" : "Show guidance"}</summary>
+            <div class="review-feedback-details-body">
+                <div class="review-feedback-box ${result.passed ? "passed" : "failed"}">
+                    ${result.infrastructureFailure
+                        ? "The execution service could not verify Python code. Your draft remains saved, and no student evidence or failed attempt was recorded."
+                        : result.passed
+                        ? "You demonstrated that the repair matches the requirement and supported it with review evidence."
+                        : "Use the evidence below to revise one decision at a time."}
                 </div>
-            `).join("")}
-        </div>
-        ${diagnosisDetails.length || testDetails.length ? `
-            <div class="review-feedback-box failed">
-                <strong>Decision feedback</strong>
-                ${[...diagnosisDetails, ...testDetails].map(detail => `<p>${escapeHtml(detail)}</p>`).join("")}
+                <div class="review-result-heading">
+                    <strong>Checklist</strong>
+                    <span>${new Date(result.timestamp).toLocaleString()}</span>
+                </div>
+                <div class="review-score-grid">
+                    ${scoreItems.map(item => `
+                        <div class="review-score-item ${item.passed ? "pass" : "fix"}">
+                            <strong>${item.passed ? "PASS" : "FIX"} · ${escapeHtml(item.label)}</strong>
+                            <span>${escapeHtml(item.detail)}</span>
+                        </div>
+                    `).join("")}
+                </div>
+                ${diagnosisDetails.length || testDetails.length ? `
+                    <div class="review-feedback-box failed">
+                        <strong>Decision feedback</strong>
+                        ${[...diagnosisDetails, ...testDetails].map(detail => `<p>${escapeHtml(detail)}</p>`).join("")}
+                    </div>
+                ` : ""}
+                <div class="review-test-results">${testRows}</div>
+                <div class="review-feedback-box review-next-action">
+                    <strong>Next action</strong>
+                    <p>${escapeHtml(getReviewNextAction(result))}</p>
+                </div>
+                ${showReference ? `
+                    <div class="review-feedback-box failed">
+                        <strong>Reference repair after three attempts</strong>
+                        <p>This is one valid answer, not the only acceptable wording or implementation.</p>
+                        <pre>${escapeHtml(task.solution)}</pre>
+                        <p>${task.issueOptions.filter(option => option.correct).map(option => escapeHtml(option.feedback)).join(" ")}</p>
+                    </div>
+                ` : ""}
             </div>
-        ` : ""}
-        <div class="review-test-results">${testRows}</div>
-        <div class="review-feedback-box review-next-action">
-            <strong>Next action</strong>
-            <p>${escapeHtml(getReviewNextAction(result))}</p>
-        </div>
-        ${showReference ? `
-            <div class="review-feedback-box failed">
-                <strong>Reference repair after three attempts</strong>
-                <p>This is one valid answer, not the only acceptable wording or implementation.</p>
-                <pre>${escapeHtml(task.solution)}</pre>
-                <p>${task.issueOptions.filter(option => option.correct).map(option => escapeHtml(option.feedback)).join(" ")}</p>
-            </div>
-        ` : ""}
+        </details>
     `;
 }
 
@@ -7308,7 +7317,7 @@ function renderReviewDashboardEvidence() {
         const state = passedChallenges > 0 ? "Demonstrated" : evidenceCount > 0 ? "Developing" : relevant.length ? "Needs revision" : "Not observed";
         const evidence = relevant.length
             ? `${evidenceCount} successful evidence checks across ${relevant.length} attempt${relevant.length === 1 ? "" : "s"}.`
-            : "Complete a Review Lab challenge to create evidence.";
+            : "Complete an AI Code Review challenge to create evidence.";
         return { ...ability, state, evidence };
     });
 
@@ -10359,6 +10368,12 @@ function setPresentationMode(enabled) {
     presentationMode = enabled;
     document.body.classList.toggle("presentation-mode", presentationMode);
     btnPresentationMode.textContent = presentationMode ? "Exit Focus" : "Focus Mode";
+    if (presentationMode) {
+        const focusTarget = document.getElementById('lesson-goal') || document.querySelector('.exercise-panel');
+        if (focusTarget) {
+            focusTarget.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+    }
 }
 
 function maybeStartGuide() {

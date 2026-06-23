@@ -220,11 +220,21 @@
         .review-option-row strong { display: block; color: #ffffff; font-size: 13px; margin-bottom: 2px; }
         .review-option-row span { color: #91a39a; font-size: 12px; }
         .review-reason { width: 100%; min-height: 92px; resize: vertical; background: #101312; color: #ffffff; border: 1px solid #3f4e46; border-radius: 6px; padding: 10px; font-size: 13px; line-height: 1.5; outline: none; }
+        .review-footer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 14px; }
         .review-reason:focus { border-color: #7cc7ff; box-shadow: 0 0 0 3px rgba(124, 199, 255, 0.12); }
         .review-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-        .review-result-panel { display: grid; gap: 14px; }
+        .review-result-panel { display: grid; gap: 12px; }
+        .review-feedback-shell { padding: 10px; }
+        .review-feedback-pill { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid #34423a; border-radius: 6px; background: #101312; color: #dbe7df; font-size: 13px; line-height: 1.45; }
+        .review-feedback-pill.passed { border-color: rgba(104, 211, 145, 0.7); background: rgba(104, 211, 145, 0.08); }
+        .review-feedback-pill.failed { border-color: rgba(244, 201, 93, 0.7); background: rgba(244, 201, 93, 0.08); }
+        .review-feedback-pill strong { color: #ffffff; }
+        .review-feedback-details { margin-top: 6px; }
+        .review-feedback-details summary { color: #7cc7ff; font-size: 12px; cursor: pointer; }
+        .review-feedback-details[open] summary { margin-bottom: 8px; }
+        .review-feedback-details-body { display: grid; gap: 10px; }
         .review-result-heading { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
-        .review-result-heading strong { color: #ffffff; font-size: 16px; }
+        .review-result-heading strong { color: #ffffff; font-size: 14px; }
         .review-result-heading span { color: #91a39a; font-size: 12px; }
         .review-score-grid { display: grid; grid-template-columns: repeat(4, minmax(130px, 1fr)); gap: 10px; }
         .review-score-item { display: grid; gap: 4px; padding: 10px; background: #101312; border: 1px solid #34423a; border-radius: 6px; }
@@ -237,11 +247,21 @@
         .review-test-result.pass { border-left-color: #68d391; }
         .review-test-result strong { color: #ffffff; }
         .review-test-result span { color: #b7c9c0; }
-        .review-feedback-box { padding: 11px 12px; border: 1px solid #34423a; border-radius: 6px; background: #101312; color: #dbe7df; font-size: 13px; line-height: 1.5; }
+        .review-feedback-box { padding: 10px 11px; border: 1px solid #34423a; border-radius: 6px; background: #101312; color: #dbe7df; font-size: 12px; line-height: 1.45; }
         .review-feedback-box.passed { border-color: rgba(104, 211, 145, 0.7); background: rgba(104, 211, 145, 0.07); }
         .review-feedback-box.failed { border-color: rgba(244, 201, 93, 0.7); background: rgba(244, 201, 93, 0.07); }
         .review-feedback-box p { margin: 7px 0 0; }
         .review-feedback-box pre { margin: 10px 0 0; padding: 10px; overflow: auto; background: #0c100f; color: #b9d8ff; border-radius: 6px; font-family: Consolas, "SFMono-Regular", monospace; font-size: 12px; line-height: 1.5; white-space: pre; }
+        .review-sample-body { display: grid; gap: 10px; }
+        .review-sample-panel { border-left: 4px solid #ff6b6b; background: linear-gradient(90deg, rgba(255, 107, 107, 0.08), rgba(255, 107, 107, 0.02)); }
+        .review-sample-question { color: #eef7f1; font-size: 13px; font-weight: 700; line-height: 1.5; }
+        .review-sample-code { margin: 0; padding: 12px; background: #0c100f; border-radius: 6px; color: #b9d8ff; font-family: Consolas, "SFMono-Regular", monospace; font-size: 12px; line-height: 1.5; overflow: auto; }
+        .review-sample-answer { display: inline-flex; align-items: center; gap: 6px; width: fit-content; padding: 8px 10px; border-radius: 6px; background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.22); color: #ff8a8a; font-size: 13px; font-weight: 800; }
+        .review-sample-explanation { padding: 8px 10px; border-radius: 6px; background: rgba(244, 162, 89, 0.1); border: 1px solid rgba(244, 162, 89, 0.22); color: #f4a259; font-size: 12px; line-height: 1.5; }
+        .review-history-panel { padding: 0; overflow: hidden; }
+        .review-history-panel summary { list-style: none; cursor: pointer; padding: 12px 14px; color: #91a39a; font-size: 12px; background: #171b1a; border-bottom: 1px solid #34423a; }
+        .review-history-panel summary::-webkit-details-marker { display: none; }
+        .review-history-panel[open] summary { border-bottom-color: #2b3631; }
         .review-dashboard { display: grid; gap: 12px; }
         .review-dashboard-summary { color: #b7c9c0; font-size: 13px; line-height: 1.5; }
         .review-ability-list { display: grid; gap: 8px; }
@@ -469,18 +489,27 @@
         .topic-complete-card p { color: #dbe7df; font-size: 14px; line-height: 1.55; }
         .topic-complete-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
         body.presentation-mode { padding: 10px; background: #080b0a; }
-        body.presentation-mode .container { width: min(1680px, 100%); gap: 10px; }
+        body.presentation-mode .container { width: min(1400px, 100%); gap: 10px; }
         body.presentation-mode .top-row,
-        body.presentation-mode .info-row { display: none; }
+        body.presentation-mode .info-row,
+        body.presentation-mode .focus-rules { display: none; }
         body.presentation-mode .header { position: sticky; top: 0; z-index: 12; background: #080b0a; border-bottom: 1px solid #34423a; padding: 8px 0 10px; }
         body.presentation-mode .header h1::after { content: " - Focus"; color: #68d391; }
         body.presentation-mode .header-actions .secondary-btn:not(#btn-presentation-mode) { display: none; }
-        body.presentation-mode .focus-rules { display: grid; gap: 6px; padding: 10px 12px; background: #101312; border: 1px solid #34423a; border-radius: 8px; color: #b7c9c0; font-size: 12px; line-height: 1.45; }
-        body.presentation-mode .focus-rules strong { color: #7cc7ff; }
-        body.presentation-mode .mission-panel-rules { display: none; }
-        body.presentation-mode .workspace-body { height: var(--workspace-height, 252px); }
-        body.presentation-mode .task-content { min-height: 0; }
+        body.presentation-mode .practice-layout { grid-template-columns: 1fr; align-items: start; }
+        body.presentation-mode .exercise-panel { order: -1; }
+        body.presentation-mode .timeline-panel,
+        body.presentation-mode .blank-slot,
+        body.presentation-mode .header-actions .secondary-btn:not(#btn-presentation-mode),
+        body.presentation-mode .header h1 { display: none; }
+        body.presentation-mode .review-lab-toolbar { display: none; }
+        body.presentation-mode .review-sample-panel { margin-top: 0; }
+        body.presentation-mode .review-workspace { grid-template-columns: 1.1fr 0.9fr; gap: 10px; }
+        body.presentation-mode .code-panel .surface-header { min-height: 46px; }
+        body.presentation-mode .workspace-body { height: var(--workspace-height, 430px); }
+        body.presentation-mode .task-content { min-height: 0; max-height: 58vh; overflow: auto; }
         body.presentation-mode .console-container { max-height: 420px; }
+        body.presentation-mode .surface { border-color: #2a3530; }
 
         @media (max-width: 980px) {
             body { padding: 14px; }
@@ -516,9 +545,9 @@
         </div>
         <div class="header-actions">
             <button class="secondary-btn view-tab active" id="btn-practice-view" type="button">Practice</button>
-            <button class="secondary-btn view-tab" id="btn-review-lab-view" type="button">Review Lab</button>
-            <button class="secondary-btn view-tab" id="btn-quality-studio-view" type="button">Quality Studio</button>
-            <button class="secondary-btn view-tab" id="btn-dashboard-view" type="button">Dashboard</button>
+            <button class="secondary-btn view-tab" id="btn-review-lab-view" type="button">AI Code Review</button>
+            <button class="secondary-btn view-tab" id="btn-quality-studio-view" type="button">Code Quality Check</button>
+            <button class="secondary-btn view-tab" id="btn-dashboard-view" type="button">Progress</button>
             <button class="secondary-btn view-tab" id="btn-question-bank-view" type="button">Question Bank</button>
             <div class="export-menu" id="export-report-menu">
                 <button class="secondary-btn" id="btn-export-report" type="button" aria-haspopup="true" aria-expanded="false">Export Report</button>
@@ -621,31 +650,40 @@ for number in numbers:
         </section>
     </section>
 
-    <section class="review-lab-view" id="review-lab-view" aria-label="AI code review lab">
+    <section class="review-lab-view" id="review-lab-view" aria-label="AI code review practice">
         <div class="review-lab-toolbar">
             <div class="flow-field">
                 <label class="field-label" for="review-task-select">Review Challenge</label>
                 <select id="review-task-select"></select>
             </div>
             <div class="review-progress" id="review-progress-label"></div>
-            <div class="review-toolbar-actions">
-                <button class="secondary-btn" id="btn-review-pause" type="button">Save &amp; Pause</button>
-                <button class="secondary-btn" id="btn-review-last-attempt" type="button">Review Last Attempt</button>
-                <button class="secondary-btn" id="btn-review-retry" type="button">Start New Attempt</button>
-                <button class="secondary-btn" id="btn-review-next" type="button">Next Challenge</button>
-            </div>
             <div class="review-session-state" id="review-session-state"></div>
         </div>
 
+        <section class="surface review-sample-panel">
+            <div class="surface-header">Before you start</div>
+            <div class="surface-body review-sample-body">
+                <p class="review-sample-question">Sample question: What should the function return for the input <code>[1, 2, 2, 3]</code>?</p>
+                <pre class="review-sample-code">def unique(values):
+    seen = []
+    for v in values:
+        if v not in seen:
+            seen.append(v)
+    return seen</pre>
+                <div class="review-sample-answer">Answer: <strong>[1, 2, 3]</strong></div>
+                <div class="review-sample-explanation">Explanation: The loop keeps the first occurrence of each value and appends it once, so duplicates are skipped.</div>
+            </div>
+        </section>
+
         <section class="surface">
-            <div class="surface-header">Requirement</div>
+            <div class="surface-header">Task Goal</div>
             <div class="surface-body review-requirement" id="review-requirement"></div>
         </section>
 
         <div class="review-workspace">
             <section class="surface">
                 <div class="surface-header">
-                    <span>AI-generated Code</span>
+                    <span>AI Code to Review</span>
                     <button class="secondary-btn" id="btn-review-restore" type="button">Restore AI Code</button>
                 </div>
                 <textarea class="review-code-editor" id="review-ai-code" spellcheck="false" wrap="off"></textarea>
@@ -653,43 +691,44 @@ for number in numbers:
 
             <div class="review-control-stack">
                 <section class="surface">
-                    <div class="surface-header">1. Identify Issues</div>
+                    <div class="surface-header">1. Pick the real problems</div>
                     <div class="review-control-body">
-                        <p class="review-control-copy">Select every claim that is genuinely wrong with this code.</p>
                         <div class="review-option-list" id="review-issue-list"></div>
                     </div>
                 </section>
                 <section class="surface">
-                    <div class="surface-header">2. Choose Tests</div>
+                    <div class="surface-header">2. Pick the right tests</div>
                     <div class="review-control-body">
-                        <p class="review-control-copy">Choose the tests needed to prove the requirement, including its boundary cases.</p>
                         <div class="review-option-list" id="review-test-list"></div>
                     </div>
                 </section>
                 <section class="surface">
-                    <div class="surface-header">3. Explain Your Fix</div>
+                    <div class="surface-header">3. Explain the fix</div>
                     <div class="review-control-body">
-                        <textarea class="review-reason" id="review-reason" placeholder="Explain the defect, why your tests expose it, and why your fix is safer."></textarea>
-                        <div class="review-actions">
-                            <button class="btn" id="btn-review-evaluate" type="button">Evaluate Review &amp; Fix</button>
-                        </div>
+                        <textarea class="review-reason" id="review-reason" placeholder="Explain what is wrong, what evidence proves it, and why the fix is better."></textarea>
                     </div>
+                </section>
+                <section class="surface review-feedback-shell">
+                    <div class="review-result-panel" id="review-results"></div>
                 </section>
             </div>
         </div>
 
-        <section class="surface">
-            <div class="surface-header">Review Evidence</div>
-            <div class="surface-body review-result-panel" id="review-results"></div>
-        </section>
-
-        <section class="surface">
-            <div class="surface-header">Attempt History</div>
+        <details class="surface review-history-panel">
+            <summary>Attempt history</summary>
             <div class="surface-body review-history" id="review-history"></div>
-        </section>
+        </details>
+
+        <div class="review-footer-actions">
+            <button class="secondary-btn" id="btn-review-pause" type="button">Save &amp; Pause</button>
+            <button class="secondary-btn" id="btn-review-last-attempt" type="button">Review Last Attempt</button>
+            <button class="secondary-btn" id="btn-review-retry" type="button">Start New Attempt</button>
+            <button class="secondary-btn" id="btn-review-next" type="button">Next Challenge</button>
+            <button class="btn" id="btn-review-evaluate" type="button">Submit Answer</button>
+        </div>
     </section>
 
-    <section class="quality-studio-view" id="quality-studio-view" aria-label="Code quality training studio">
+    <section class="quality-studio-view" id="quality-studio-view" aria-label="Code quality check practice">
         <div class="quality-toolbar">
             <div class="flow-field">
                 <label class="field-label" for="quality-task-select">Quality Challenge</label>
@@ -758,9 +797,9 @@ for number in numbers:
         </section>
     </section>
 
-    <section class="dashboard-view" id="dashboard-view" aria-label="Learning dashboard">
+    <section class="dashboard-view" id="dashboard-view" aria-label="Learning progress dashboard">
         <section class="surface">
-            <div class="surface-header">Learning Dashboard</div>
+            <div class="surface-header">Learning Progress</div>
             <div class="surface-body dashboard-grid">
                 <div id="dashboard-summary"></div>
                 <div>
